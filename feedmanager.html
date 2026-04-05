@@ -125,13 +125,34 @@
             border-bottom: 1px solid #e9eddf;
             padding-bottom: 12px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
         }
         .article-item:last-child {
             border-bottom: none;
             padding-bottom: 0;
+        }
+        /* Thumbnail Container */
+        .article-thumb {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: #f0f2e9;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+        .article-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+        .article-thumb:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .article-content {
             flex: 1;
@@ -161,17 +182,18 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.8rem;
             opacity: 0.5;
             transition: 0.2s;
             padding: 4px;
             border-radius: 20px;
             color: #a55;
+            margin-left: auto;
+            align-self: flex-start;
         }
         .hide-btn:hover {
             opacity: 1;
             background: #f0f0f0;
-            transform: scale(1.1);
         }
         .error-message {
             background: #fff2f0;
@@ -217,6 +239,27 @@
         button.reset-hidden:hover {
             background: #dee2e6;
         }
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
@@ -227,88 +270,33 @@
     </div>
     <div class="grid" id="dashboardGrid"></div>
     <footer>
-        <span>🗑️ Klick blendet aus – neue Artikel rücken aus dem Pool nach (max. 10 sichtbar).</span>
+        <span>🗑️ Klick blendet aus – neue rücken nach (max. 10 sichtbar). Thumbnail = Vorschaubild der verlinkten Seite.</span>
         <button id="resetHiddenBtn" class="reset-hidden">♻️ Alle ausgeblendeten Artikel zurücksetzen</button>
     </footer>
 </div>
 
 <script>
     // --------------------------------------------------------------
-    // FEED KONFIGURATION – alle URLs funktionieren zuverlässig über rss2json.com
+    // FEED KONFIGURATION – alle URLs funktionieren zuverlässig
     // --------------------------------------------------------------
     const FEEDS = [
-        {
-            id: "oekolandbau",
-            title: "🌾 Ökolandbau & Nachhaltigkeit",
-            url: "https://utopia.de/rss/",
-            cacheKey: "feed_oekolandbau",
-            lastUpdateKey: "last_oekolandbau"
-        },
-        {
-            id: "agrarpolitik",
-            title: "🚜 Agrarmarkt & Agrarpolitik",
-            url: "https://www.agrarheute.com/rss",
-            cacheKey: "feed_agrarpolitik",
-            lastUpdateKey: "last_agrarpolitik"
-        },
-        {
-            id: "slowfood",
-            title: "🍽️ Slow Food & Genusskultur",
-            url: "https://www.slowfood.de/rss.xml",
-            cacheKey: "feed_slowfood",
-            lastUpdateKey: "last_slowfood"
-        },
-        {
-            id: "biokonsum",
-            title: "🥦 Bio-Konsum & nachhaltige Ernährung",
-            url: "https://www.bzfe.de/rss/",   // Bundeszentrum für Ernährung – stabil
-            cacheKey: "feed_biokonsum",
-            lastUpdateKey: "last_biokonsum",
-            fallbackUrl: "https://www.oekotest.de/rss.xml"
-        },
-        {
-            id: "bayernfranken",
-            title: "🏔️ Bayern & Franken Regional",
-            url: "https://www.mainpost.de/rss",   // Mainpost Würzburg – regional
-            cacheKey: "feed_bayernfranken",
-            lastUpdateKey: "last_bayernfranken",
-            fallbackUrl: "https://www.nordbayern.de/rss"
-        },
-        {
-            id: "klima",
-            title: "🌍 Klimaschutz & CO₂-Fußabdruck",
-            url: "https://www.zeit.de/thema/klimawandel/rss",
-            cacheKey: "feed_klima",
-            lastUpdateKey: "last_klima",
-            fallbackUrl: "https://www.spiegel.de/thema/klimawandel/index.rss"
-        },
-        {
-            id: "manufaktur",
-            title: "🔨 Manufaktur & Lebensmittelhandwerk",
-            url: "https://www.deutsche-handwerks-zeitung.de/rss",
-            cacheKey: "feed_manufaktur",
-            lastUpdateKey: "last_manufaktur"
-        },
-        {
-            id: "gemeinwohl",
-            title: "🏛️ Gemeinwohl & Politik",
-            url: "https://www.gemeinwohl-oekonomie.org/de/feed/",  // GWÖ Deutschland
-            cacheKey: "feed_gemeinwohl",
-            lastUpdateKey: "last_gemeinwohl",
-            fallbackUrl: "https://www.stmelf.bayern.de/rss/"
-        },
-        {
-            id: "energievision",
-            title: "⚡ Energievision Franken",
-            url: "https://energievision-franken.de/index.php/aktuelles-von-der-energievision-franken?format=feed&type=rss",
-            cacheKey: "feed_energievision",
-            lastUpdateKey: "last_energievision"
-        }
+        { id: "oekolandbau", title: "🌾 Ökolandbau & Nachhaltigkeit", url: "https://utopia.de/rss/", cacheKey: "feed_oekolandbau", lastUpdateKey: "last_oekolandbau" },
+        { id: "agrarpolitik", title: "🚜 Agrarmarkt & Agrarpolitik", url: "https://www.agrarheute.com/rss", cacheKey: "feed_agrarpolitik", lastUpdateKey: "last_agrarpolitik" },
+        { id: "slowfood", title: "🍽️ Slow Food & Genusskultur", url: "https://www.slowfood.de/rss.xml", cacheKey: "feed_slowfood", lastUpdateKey: "last_slowfood" },
+        { id: "biokonsum", title: "🥦 Bio-Konsum & nachhaltige Ernährung", url: "https://www.oekotest.de/rss.xml", cacheKey: "feed_biokonsum", lastUpdateKey: "last_biokonsum", fallbackUrl: "https://www.biohandel.de/rss/feed.html?type=100" },
+        { id: "bayernfranken", title: "🏔️ Bayern & Franken Regional", url: "https://www.mainpost.de/rss", cacheKey: "feed_bayernfranken", lastUpdateKey: "last_bayernfranken", fallbackUrl: "https://www.nordbayern.de/rss" },
+        { id: "klima", title: "🌍 Klimaschutz & CO₂-Fußabdruck", url: "https://www.zeit.de/thema/klimawandel/rss", cacheKey: "feed_klima", lastUpdateKey: "last_klima", fallbackUrl: "https://www.spiegel.de/thema/klimawandel/index.rss" },
+        { id: "manufaktur", title: "🔨 Manufaktur & Lebensmittelhandwerk", url: "https://www.deutsche-handwerks-zeitung.de/rss", cacheKey: "feed_manufaktur", lastUpdateKey: "last_manufaktur" },
+        { id: "gemeinwohl", title: "🏛️ Gemeinwohl & Politik", url: "https://www.bund.net/rss/", cacheKey: "feed_gemeinwohl", lastUpdateKey: "last_gemeinwohl", fallbackUrl: "https://www.greenpeace.de/rss" },
+        { id: "energievision", title: "⚡ Energievision Franken", url: "https://energievision-franken.de/index.php/aktuelles-von-der-energievision-franken?format=feed&type=rss", cacheKey: "feed_energievision", lastUpdateKey: "last_energievision" }
     ];
 
     const VISIBLE_LIMIT = 10;
     const POOL_SIZE = 30;
     const RSS2JSON_API = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+    // Thumbnail-Cache: URL -> Bild-URL
+    let thumbnailCache = new Map();
 
     // ---------- Ausgeblendete Artikel ----------
     function getHiddenLinks() {
@@ -339,6 +327,45 @@
                 updateSingleFeed(feed.id, false);
             }
         }
+    }
+
+    // ---------- Thumbnail-Extraktion aus Ziel-URL (Open Graph / erstes Bild) ----------
+    async function fetchThumbnailForUrl(articleUrl) {
+        if (thumbnailCache.has(articleUrl)) return thumbnailCache.get(articleUrl);
+        
+        // Fallback: Platzhalter-Bild (wird während des Ladens gezeigt)
+        thumbnailCache.set(articleUrl, null);
+        
+        try {
+            // Verwende einen CORS-Proxy, um die Zielseite abzurufen (da viele Seiten CORS blockieren)
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(articleUrl)}`;
+            const response = await fetch(proxyUrl, { timeout: 8000 });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const html = await response.text();
+            
+            // 1. Suche nach og:image
+            const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
+            if (ogMatch && ogMatch[1]) {
+                const imgUrl = new URL(ogMatch[1], articleUrl).href;
+                thumbnailCache.set(articleUrl, imgUrl);
+                return imgUrl;
+            }
+            
+            // 2. Suche nach erstem <img> (relative URLs auflösen)
+            const imgMatch = html.match(/<img[^>]*src=["']([^"']+)["']/i);
+            if (imgMatch && imgMatch[1]) {
+                let imgUrl = imgMatch[1];
+                if (!imgUrl.startsWith('http')) {
+                    imgUrl = new URL(imgUrl, articleUrl).href;
+                }
+                thumbnailCache.set(articleUrl, imgUrl);
+                return imgUrl;
+            }
+        } catch (err) {
+            console.warn(`Thumbnail-Fehler für ${articleUrl}:`, err.message);
+        }
+        thumbnailCache.set(articleUrl, null);
+        return null;
     }
 
     // ---------- Netzwerk & Cache ----------
@@ -394,11 +421,10 @@
         return null;
     }
 
-    // ---------- Rendern mit garantierter Nachrück-Logik ----------
-    function renderVisibleArticles(container, allArticles, feedId, statusSpan) {
+    // ---------- Rendern mit Thumbnails (asynchron nachgeladen) ----------
+    async function renderVisibleArticles(container, allArticles, feedId, statusSpan) {
         if (!container) return;
         const hiddenLinks = getHiddenLinks();
-        // Alle nicht ausgeblendeten Artikel
         const visiblePool = allArticles.filter(article => {
             const link = article.link || "#";
             return !hiddenLinks.includes(link);
@@ -417,13 +443,18 @@
             return;
         }
 
-        const html = shownArticles.map(article => {
+        // Leeres Gerüst mit Platzhaltern
+        container.innerHTML = shownArticles.map((article, idx) => {
             const title = article.title || "Ohne Titel";
             const link = article.link || "#";
             const pubDate = formatDate(article.pubDate);
             const author = article.author ? ` von ${escapeHtml(article.author)}` : '';
+            const thumbId = `thumb-${feedId}-${idx}-${Date.now()}`;
             return `
                 <div class="article-item" data-link="${escapeHtml(link)}">
+                    <div class="article-thumb" id="${thumbId}" data-url="${escapeHtml(link)}">
+                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e9eddf; color:#8faa7b; font-size:10px;">🖼️</div>
+                    </div>
                     <div class="article-content">
                         <div class="article-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
                         <div class="article-meta">
@@ -435,25 +466,64 @@
                 </div>
             `;
         }).join('');
-        container.innerHTML = html;
+
+        // Thumbnails asynchron nachladen
+        for (let i = 0; i < shownArticles.length; i++) {
+            const article = shownArticles[i];
+            const link = article.link || "#";
+            const thumbId = container.querySelector(`.article-item[data-link="${escapeHtml(link)}"] .article-thumb`)?.id;
+            if (thumbId) {
+                const thumbDiv = document.getElementById(thumbId);
+                if (thumbDiv) {
+                    const imgUrl = await fetchThumbnailForUrl(link);
+                    if (imgUrl) {
+                        const img = document.createElement('img');
+                        img.src = imgUrl;
+                        img.alt = "Vorschau";
+                        img.style.width = "100%";
+                        img.style.height = "100%";
+                        img.style.objectFit = "cover";
+                        img.style.cursor = "pointer";
+                        img.onclick = (e) => {
+                            e.stopPropagation();
+                            showLightbox(imgUrl);
+                        };
+                        thumbDiv.innerHTML = '';
+                        thumbDiv.appendChild(img);
+                    } else {
+                        thumbDiv.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e9eddf; color:#8faa7b; font-size:20px;">📷</div>';
+                    }
+                }
+            }
+        }
 
         if (statusSpan) {
             statusSpan.innerText = `✅ ${shownArticles.length} sichtbar (${totalPool} total, ${hiddenCount} ausgeblendet)`;
             statusSpan.className = "feed-status status-ok";
         }
 
-        // Event-Listener für die neuen Hide-Buttons
+        // Hide-Buttons neu binden
         container.querySelectorAll('.hide-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const link = btn.getAttribute('data-link');
                 if (link) {
                     addHiddenLink(link);
-                    // Neu rendern mit dem gleichen allArticles-Array → rückt nach!
                     renderVisibleArticles(container, allArticles, feedId, statusSpan);
                 }
             });
         });
+    }
+
+    // Lightbox für vergrößerte Ansicht
+    function showLightbox(imgUrl) {
+        const lb = document.createElement('div');
+        lb.className = 'lightbox';
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        lb.appendChild(img);
+        lb.onclick = () => lb.remove();
+        document.body.appendChild(lb);
     }
 
     function formatDate(dateString) {
@@ -488,9 +558,8 @@
         let currentItems = cached?.items || [];
         let currentLastUpdate = cached?.lastUpdate || null;
 
-        // Sofort Cache anzeigen (falls vorhanden)
         if (currentItems.length > 0 && !forceRefresh) {
-            renderVisibleArticles(listContainer, currentItems, feedId, statusSpan);
+            await renderVisibleArticles(listContainer, currentItems, feedId, statusSpan);
             if (lastUpdatedSpan && currentLastUpdate) lastUpdatedSpan.innerText = new Date(parseInt(currentLastUpdate)).toLocaleString();
             if (statusSpan && !statusSpan.innerText.includes('sichtbar')) {
                 const visibleCount = currentItems.filter(a => !getHiddenLinks().includes(a.link || "#")).length;
@@ -501,7 +570,6 @@
             if (listContainer) listContainer.innerHTML = '<div class="empty-state">⏳ Lade Feed ...</div>';
         }
 
-        // Live-Abruf
         try {
             if (statusSpan && !forceRefresh && currentItems.length===0) statusSpan.innerText = "🔄 wird geladen...";
             else if (forceRefresh && statusSpan) statusSpan.innerText = "🔄 aktualisiere...";
@@ -511,7 +579,7 @@
             const timestamp = Date.now().toString();
             saveFeedCache(feedId, limitedItems, timestamp);
 
-            renderVisibleArticles(listContainer, limitedItems, feedId, statusSpan);
+            await renderVisibleArticles(listContainer, limitedItems, feedId, statusSpan);
             if (lastUpdatedSpan) lastUpdatedSpan.innerText = new Date(parseInt(timestamp)).toLocaleString();
         } catch (error) {
             console.error(`Feed ${feedId} Fehler:`, error);
@@ -528,7 +596,7 @@
                     statusSpan.className = "feed-status status-error";
                 }
                 if (listContainer && cachedAfterError.items.length) {
-                    renderVisibleArticles(listContainer, cachedAfterError.items, feedId, statusSpan);
+                    await renderVisibleArticles(listContainer, cachedAfterError.items, feedId, statusSpan);
                 }
             }
         }
