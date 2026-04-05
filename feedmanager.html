@@ -125,34 +125,13 @@
             border-bottom: 1px solid #e9eddf;
             padding-bottom: 12px;
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
         }
         .article-item:last-child {
             border-bottom: none;
             padding-bottom: 0;
-        }
-        /* Thumbnail Container */
-        .article-thumb {
-            flex-shrink: 0;
-            width: 80px;
-            height: 80px;
-            background: #f0f2e9;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-        .article-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            display: block;
-        }
-        .article-thumb:hover {
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .article-content {
             flex: 1;
@@ -182,18 +161,17 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 1rem;
             opacity: 0.5;
             transition: 0.2s;
             padding: 4px;
             border-radius: 20px;
             color: #a55;
-            margin-left: auto;
-            align-self: flex-start;
         }
         .hide-btn:hover {
             opacity: 1;
             background: #f0f0f0;
+            transform: scale(1.1);
         }
         .error-message {
             background: #fff2f0;
@@ -239,27 +217,6 @@
         button.reset-hidden:hover {
             background: #dee2e6;
         }
-        /* Lightbox */
-        .lightbox {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            cursor: pointer;
-        }
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
 <body>
@@ -270,7 +227,7 @@
     </div>
     <div class="grid" id="dashboardGrid"></div>
     <footer>
-        <span>🗑️ Klick blendet aus – neue rücken nach (max. 10 sichtbar). Thumbnail = Vorschaubild der verlinkten Seite.</span>
+        <span>🗑️ Klick blendet aus – neue Artikel rücken nach (max. 10 sichtbar).</span>
         <button id="resetHiddenBtn" class="reset-hidden">♻️ Alle ausgeblendeten Artikel zurücksetzen</button>
     </footer>
 </div>
@@ -294,9 +251,6 @@
     const VISIBLE_LIMIT = 10;
     const POOL_SIZE = 30;
     const RSS2JSON_API = "https://api.rss2json.com/v1/api.json?rss_url=";
-
-    // Thumbnail-Cache: URL -> Bild-URL
-    let thumbnailCache = new Map();
 
     // ---------- Ausgeblendete Artikel ----------
     function getHiddenLinks() {
@@ -327,45 +281,6 @@
                 updateSingleFeed(feed.id, false);
             }
         }
-    }
-
-    // ---------- Thumbnail-Extraktion aus Ziel-URL (Open Graph / erstes Bild) ----------
-    async function fetchThumbnailForUrl(articleUrl) {
-        if (thumbnailCache.has(articleUrl)) return thumbnailCache.get(articleUrl);
-        
-        // Fallback: Platzhalter-Bild (wird während des Ladens gezeigt)
-        thumbnailCache.set(articleUrl, null);
-        
-        try {
-            // Verwende einen CORS-Proxy, um die Zielseite abzurufen (da viele Seiten CORS blockieren)
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(articleUrl)}`;
-            const response = await fetch(proxyUrl, { timeout: 8000 });
-            if (!response.ok) throw new Error("HTTP " + response.status);
-            const html = await response.text();
-            
-            // 1. Suche nach og:image
-            const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
-            if (ogMatch && ogMatch[1]) {
-                const imgUrl = new URL(ogMatch[1], articleUrl).href;
-                thumbnailCache.set(articleUrl, imgUrl);
-                return imgUrl;
-            }
-            
-            // 2. Suche nach erstem <img> (relative URLs auflösen)
-            const imgMatch = html.match(/<img[^>]*src=["']([^"']+)["']/i);
-            if (imgMatch && imgMatch[1]) {
-                let imgUrl = imgMatch[1];
-                if (!imgUrl.startsWith('http')) {
-                    imgUrl = new URL(imgUrl, articleUrl).href;
-                }
-                thumbnailCache.set(articleUrl, imgUrl);
-                return imgUrl;
-            }
-        } catch (err) {
-            console.warn(`Thumbnail-Fehler für ${articleUrl}:`, err.message);
-        }
-        thumbnailCache.set(articleUrl, null);
-        return null;
     }
 
     // ---------- Netzwerk & Cache ----------
@@ -421,8 +336,8 @@
         return null;
     }
 
-    // ---------- Rendern mit Thumbnails (asynchron nachgeladen) ----------
-    async function renderVisibleArticles(container, allArticles, feedId, statusSpan) {
+    // ---------- Rendern mit Nachrück-Logik ----------
+    function renderVisibleArticles(container, allArticles, feedId, statusSpan) {
         if (!container) return;
         const hiddenLinks = getHiddenLinks();
         const visiblePool = allArticles.filter(article => {
@@ -443,18 +358,13 @@
             return;
         }
 
-        // Leeres Gerüst mit Platzhaltern
-        container.innerHTML = shownArticles.map((article, idx) => {
+        const html = shownArticles.map(article => {
             const title = article.title || "Ohne Titel";
             const link = article.link || "#";
             const pubDate = formatDate(article.pubDate);
             const author = article.author ? ` von ${escapeHtml(article.author)}` : '';
-            const thumbId = `thumb-${feedId}-${idx}-${Date.now()}`;
             return `
                 <div class="article-item" data-link="${escapeHtml(link)}">
-                    <div class="article-thumb" id="${thumbId}" data-url="${escapeHtml(link)}">
-                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e9eddf; color:#8faa7b; font-size:10px;">🖼️</div>
-                    </div>
                     <div class="article-content">
                         <div class="article-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
                         <div class="article-meta">
@@ -466,43 +376,13 @@
                 </div>
             `;
         }).join('');
-
-        // Thumbnails asynchron nachladen
-        for (let i = 0; i < shownArticles.length; i++) {
-            const article = shownArticles[i];
-            const link = article.link || "#";
-            const thumbId = container.querySelector(`.article-item[data-link="${escapeHtml(link)}"] .article-thumb`)?.id;
-            if (thumbId) {
-                const thumbDiv = document.getElementById(thumbId);
-                if (thumbDiv) {
-                    const imgUrl = await fetchThumbnailForUrl(link);
-                    if (imgUrl) {
-                        const img = document.createElement('img');
-                        img.src = imgUrl;
-                        img.alt = "Vorschau";
-                        img.style.width = "100%";
-                        img.style.height = "100%";
-                        img.style.objectFit = "cover";
-                        img.style.cursor = "pointer";
-                        img.onclick = (e) => {
-                            e.stopPropagation();
-                            showLightbox(imgUrl);
-                        };
-                        thumbDiv.innerHTML = '';
-                        thumbDiv.appendChild(img);
-                    } else {
-                        thumbDiv.innerHTML = '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e9eddf; color:#8faa7b; font-size:20px;">📷</div>';
-                    }
-                }
-            }
-        }
+        container.innerHTML = html;
 
         if (statusSpan) {
             statusSpan.innerText = `✅ ${shownArticles.length} sichtbar (${totalPool} total, ${hiddenCount} ausgeblendet)`;
             statusSpan.className = "feed-status status-ok";
         }
 
-        // Hide-Buttons neu binden
         container.querySelectorAll('.hide-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -513,17 +393,6 @@
                 }
             });
         });
-    }
-
-    // Lightbox für vergrößerte Ansicht
-    function showLightbox(imgUrl) {
-        const lb = document.createElement('div');
-        lb.className = 'lightbox';
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        lb.appendChild(img);
-        lb.onclick = () => lb.remove();
-        document.body.appendChild(lb);
     }
 
     function formatDate(dateString) {
@@ -559,7 +428,7 @@
         let currentLastUpdate = cached?.lastUpdate || null;
 
         if (currentItems.length > 0 && !forceRefresh) {
-            await renderVisibleArticles(listContainer, currentItems, feedId, statusSpan);
+            renderVisibleArticles(listContainer, currentItems, feedId, statusSpan);
             if (lastUpdatedSpan && currentLastUpdate) lastUpdatedSpan.innerText = new Date(parseInt(currentLastUpdate)).toLocaleString();
             if (statusSpan && !statusSpan.innerText.includes('sichtbar')) {
                 const visibleCount = currentItems.filter(a => !getHiddenLinks().includes(a.link || "#")).length;
@@ -579,7 +448,7 @@
             const timestamp = Date.now().toString();
             saveFeedCache(feedId, limitedItems, timestamp);
 
-            await renderVisibleArticles(listContainer, limitedItems, feedId, statusSpan);
+            renderVisibleArticles(listContainer, limitedItems, feedId, statusSpan);
             if (lastUpdatedSpan) lastUpdatedSpan.innerText = new Date(parseInt(timestamp)).toLocaleString();
         } catch (error) {
             console.error(`Feed ${feedId} Fehler:`, error);
@@ -596,7 +465,7 @@
                     statusSpan.className = "feed-status status-error";
                 }
                 if (listContainer && cachedAfterError.items.length) {
-                    await renderVisibleArticles(listContainer, cachedAfterError.items, feedId, statusSpan);
+                    renderVisibleArticles(listContainer, cachedAfterError.items, feedId, statusSpan);
                 }
             }
         }
