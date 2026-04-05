@@ -319,61 +319,61 @@
 const CSV_DATEI = null;   // z. B. 'quellen.csv' – oder null für Inline-Modus
 
 const QUELLEN_CSV = `
-# ── ÖKOLANDBAU & NACHHALTIGKEIT (mehrere Quellen → wird zusammengeführt) ──
-# Offizielle Bundesinformationsstelle Ökolandbau (BMEL)
-https://www.oekolandbau.de/service/presse/pressemitteilungen/?type=100,Ökolandbau & Nachhaltigkeit,2026-04-05
-# Bioland Verband – News & Pressemitteilungen
-https://www.bioland.de/aktuelles/neues/news-und-pressemitteilungen?type=100,Ökolandbau & Nachhaltigkeit,2026-04-05
-# Demeter – Biodynamische Landwirtschaft
-https://www.demeter.de/index.rss,Ökolandbau & Nachhaltigkeit,2026-04-05
-# Naturland Verband (Bayern stark vertreten)
-https://www.naturland.de/de/naturland/presse.html?format=feed&type=rss,Ökolandbau & Nachhaltigkeit,2026-04-05
+# ── ÖKOLANDBAU & NACHHALTIGKEIT ──
+# Utopia.de – größtes deutsches Nachhaltigkeitsportal (WordPress → /feed/ gesichert)
+https://utopia.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
+# Biorama – Bio/Nachhaltigkeitsmagazin Österreich (WordPress → /feed/ gesichert)
+https://www.biorama.eu/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
+# SÖL – Stiftung Ökologie & Landbau (WordPress)
+https://www.soel.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
 
 # ── AGRARMARKT & AGRARPOLITIK ──
-# Agrarheute – führendes Fachmagazin
+# Agrarheute – Hauptfeed (führendes dt. Agrarportal)
 https://www.agrarheute.com/rss,Agrarmarkt & Agrarpolitik,2026-04-05
-# top agrar – Agrarmagazin Deutschland
-https://www.topagrar.com/rss/feed.xml,Agrarmarkt & Agrarpolitik,2026-04-05
+# top agrar – Gesamtfeed Nachrichten
+https://www.topagrar.com/rss/topagrar-nachrichten.xml,Agrarmarkt & Agrarpolitik,2026-04-05
 
 # ── SLOW FOOD & GENUSSKULTUR ──
-# Slow Food Deutschland e.V. (WordPress-Blog)
+# Slow Food Deutschland e.V. (WordPress → /feed/ gesichert)
 https://www.slowfood.de/feed/,Slow Food & Genusskultur,2026-04-05
 
 # ── BIO-KONSUM & NACHHALTIGE ERNÄHRUNG ──
-# Biorama – österreichisches Magazin zu Bio und Nachhaltigkeit
-https://www.biorama.eu/feed/,Bio-Konsum & nachhaltige Ernährung,2026-04-05
-# BioHandel – Fachmagazin für den Naturkosthandel
-https://www.biohandel-online.de/rss,Bio-Konsum & nachhaltige Ernährung,2026-04-05
+# Smarticular – Nachhaltigkeit & Zero Waste im Alltag (WordPress)
+https://www.smarticular.net/feed/,Bio-Konsum & nachhaltige Ernährung,2026-04-05
+# BioHandel – Naturkost Fachmagazin
+https://www.biohandel-online.de/news/feed.rss,Bio-Konsum & nachhaltige Ernährung,2026-04-05
 
 # ── BAYERN & FRANKEN REGIONAL ──
-# Bayerischer Rundfunk – Wirtschaft & Landwirtschaft
+# BR24 Wirtschaft – Bayerischer Rundfunk (gesicherter RSS-Endpunkt)
 https://www.br.de/nachrichten/wirtschaft/index.rss,Bayern & Franken Regional,2026-04-05
-# Nordbayern.de – Nachrichtenportal Mittelfranken / Nürnberg
-https://www.nordbayern.de/region/nuernberg/rss/nürnberg-nachrichten,Bayern & Franken Regional,2026-04-05
-# Öko-Modellregionen Bayern (LfL)
-https://oekomodellregionen.bayern/feed,Bayern & Franken Regional,2026-04-05
+# Main-Post – Regionalzeitung Unterfranken/Mainfranken
+https://www.mainpost.de/storage/rss/rss/top.xml,Bayern & Franken Regional,2026-04-05
+# Nordbayern.de – Nürnberg/Mittelfranken
+https://www.nordbayern.de/region/nuernberg/rss,Bayern & Franken Regional,2026-04-05
 
 # ── KLIMASCHUTZ & CO₂-FUSSABDRUCK ──
-# NABU – Naturschutzbund Deutschland
+# NABU – Naturschutzbund (gesicherter RSS-Endpunkt)
 https://www.nabu.de/rss/alle-news.xml,Klimaschutz & CO₂-Fußabdruck,2026-04-05
-# WWF Deutschland
-https://www.wwf.de/services/newsroom/rss/,Klimaschutz & CO₂-Fußabdruck,2026-04-05
+# Greenpeace Deutschland (WordPress)
+https://www.greenpeace.de/feed,Klimaschutz & CO₂-Fußabdruck,2026-04-05
 
 # ── MANUFAKTUR & LEBENSMITTELHANDWERK ──
-# Lebensmittel Praxis – Fachblatt für den LEH
-https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-05
-# Deutsche Handwerkszeitung
+# Deutsche Handwerkszeitung (WordPress → /feed/ gesichert)
 https://www.deutsche-handwerks-zeitung.de/feed/,Manufaktur & Lebensmittelhandwerk,2026-04-05
+# Lebensmittelpraxis – Fachportal LEH
+https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-05
 `;
 
 /* ================================================================
    KONFIGURATION
    ================================================================ */
 const MAX_PRO_GRUPPE = 15;    // Max. Einträge pro Gruppenabschnitt
-const FETCH_TIMEOUT_MS = 9000;
+const FETCH_TIMEOUT_MS = 12000;
 
-// CORS-Proxy (kostenlos, kein API-Key nötig)
-const PROXY_URL = 'https://api.allorigins.win/get?url=';
+// rss2json: zweckgebundener RSS-CORS-Proxy, kostenlos bis 10k req/Tag
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=20&rss_url=';
+// Fallback: allorigins (generischer Proxy + eigenes XML-Parsing)
+const ALLORIGINS = 'https://api.allorigins.win/get?url=';
 
 /* ================================================================
    CSV PARSER
@@ -475,28 +475,48 @@ function stripHTML(html) {
 }
 
 /* ================================================================
-   FETCH MIT CORS-PROXY + TIMEOUT
+   FETCH – rss2json primär, allorigins+XML als Fallback
    ================================================================ */
+function withTimeout(promise, ms) {
+  const t = new Promise((_, r) => setTimeout(() => r(new Error('Timeout')), ms));
+  return Promise.race([promise, t]);
+}
+
+async function fetchViaRss2json(url) {
+  const resp = await withTimeout(fetch(RSS2JSON + encodeURIComponent(url)), FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const json = await resp.json();
+  if (json.status !== 'ok') throw new Error('rss2json: ' + (json.message || json.status));
+  return (json.items || []).map(item => ({
+    title:   (item.title || '').trim() || '(Kein Titel)',
+    link:    item.link || item.guid || '#',
+    date:    item.pubDate ? new Date(item.pubDate) : new Date(0),
+    summary: stripHTML(item.description || item.content || '').replace(/\s+/g, ' ').trim().slice(0, 230),
+    domain:  extractDomain(url)
+  })).filter(i => i.link !== '#');
+}
+
+async function fetchViaAllorigins(url) {
+  const resp = await withTimeout(fetch(ALLORIGINS + encodeURIComponent(url)), FETCH_TIMEOUT_MS);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const json = await resp.json();
+  if (!json.contents) throw new Error('Kein Inhalt');
+  return parseFeedXML(json.contents, url);
+}
+
 async function fetchFeed(url) {
-  const timeoutP = new Promise((_, rej) =>
-    setTimeout(() => rej(new Error('Timeout nach ' + FETCH_TIMEOUT_MS + 'ms')), FETCH_TIMEOUT_MS)
-  );
   try {
-    const resp = await Promise.race([
-      fetch(PROXY_URL + encodeURIComponent(url)),
-      timeoutP
-    ]);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const json = await resp.json();
-    if (!json.contents) throw new Error('Kein Inhalt');
-    const ct = json.status?.content_type || '';
-    if (ct.includes('html') && !json.contents.includes('<rss') && !json.contents.includes('<feed')) {
-      throw new Error('Kein Feed-Inhalt (HTML erhalten)');
+    const items = await fetchViaRss2json(url);
+    return { items, error: null };
+  } catch (e1) {
+    console.warn('rss2json Fehler für', url, '–', e1.message, '→ Fallback allorigins');
+    try {
+      const items = await fetchViaAllorigins(url);
+      return { items, error: null };
+    } catch (e2) {
+      console.warn('allorigins Fehler für', url, '–', e2.message);
+      return { items: [], error: e1.message };
     }
-    return { items: parseFeedXML(json.contents, url), error: null };
-  } catch (e) {
-    console.warn('Feed-Fehler:', url, e.message);
-    return { items: [], error: e.message };
   }
 }
 
