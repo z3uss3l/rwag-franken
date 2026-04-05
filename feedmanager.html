@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regionalwert Franken · News-Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f4f7f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #cbd5c0;
+        }
+        h1 {
+            margin: 0;
+            color: #2d4a1e;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+        .refresh-all {
+            background: #2d6a4f;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .refresh-all:hover {
+            background: #1b4d3e;
+            transform: scale(0.97);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: 0.2s;
+            border: 1px solid #e2e8d5;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header {
+            background: #eef3e8;
+            padding: 14px 20px;
+            border-bottom: 1px solid #d4e0c8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .category-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #2c5e2a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            background: #d9e6c3;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2d4a1e;
+        }
+        .feed-status {
+            font-size: 0.7rem;
+            background: #fef9e3;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-ok { background: #e0f2e2; color: #1e5620; }
+        .status-error { background: #ffe6e5; color: #b91c1c; }
+        .status-stale { background: #fff0cf; color: #a86800; }
+        .refresh-feed {
+            background: none;
+            border: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: #3b6e2b;
+            text-decoration: underline;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        .refresh-feed:hover {
+            background: #e2e8d5;
+        }
+        .article-list {
+            padding: 12px 16px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .article-item {
+            border-bottom: 1px solid #e9eddf;
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .article-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .article-content {
+            flex: 1;
+        }
+        .article-title {
+            font-weight: 600;
+            margin: 0 0 6px 0;
+            line-height: 1.4;
+        }
+        .article-title a {
+            text-decoration: none;
+            color: #1e3a1e;
+        }
+        .article-title a:hover {
+            text-decoration: underline;
+            color: #2b6e2b;
+        }
+        .article-meta {
+            font-size: 0.7rem;
+            color: #6b7b5e;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .hide-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            opacity: 0.5;
+            transition: 0.2s;
+            padding: 4px;
+            border-radius: 20px;
+            color: #a55;
+        }
+        .hide-btn:hover {
+            opacity: 1;
+            background: #f0f0f0;
+            transform: scale(1.1);
+        }
+        .error-message {
+            background: #fff2f0;
+            padding: 16px;
+            border-radius: 16px;
+            color: #b13b2d;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .last-updated {
+            font-size: 0.7rem;
+            color: #7c8f6e;
+            margin-top: 10px;
+            text-align: right;
+            border-top: 1px dashed #e2e8d5;
+            padding-top: 10px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #8faa7b;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #7c8f6e;
+            border-top: 1px solid #dce5d0;
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        button.reset-hidden {
+            background: #e9ecef;
+            border: 1px solid #cbd5c0;
+            padding: 6px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        button.reset-hidden:hover {
+            background: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="header">
+        <h1>🌿 Regionalwert Franken · News-Dashboard</h1>
+        <button class="refresh-all" id="refreshAllBtn">🔄 Alle Feeds aktualisieren</button>
+    </div>
+    <div class="grid" id="dashboardGrid"></div>
+    <footer>
+        <span>⚡ Klick auf 🗑️ blendet Artikel dauerhaft aus (nur für Sie).</span>
+        <button id="resetHiddenBtn" class="reset-hidden">♻️ Alle ausgeblendeten Artikel zurücksetzen</button>
+        <span>📦 Bei Proxy-Fehlern werden zuletzt geladene Artikel angezeigt – kein Datenverlust.</span>
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // FEED KONFIGURATION – erweitert um regionale & thematische Quellen
+    // --------------------------------------------------------------
+    const FEEDS = [
+        {
+            id: "oekolandbau",
+            title: "🌾 Ökolandbau & Nachhaltigkeit",
+            url: "https://utopia.de/rss/",
+            cacheKey: "feed_oekolandbau",
+            lastUpdateKey: "last_oekolandbau"
+        },
+        {
+            id: "agrarpolitik",
+            title: "🚜 Agrarmarkt & Agrarpolitik",
+            url: "https://www.agrarheute.com/rss",
+            cacheKey: "feed_agrarpolitik",
+            lastUpdateKey: "last_agrarpolitik"
+        },
+        {
+            id: "slowfood",
+            title: "🍽️ Slow Food & Genusskultur",
+            url: "https://www.slowfood.de/rss.xml",
+            cacheKey: "feed_slowfood",
+            lastUpdateKey: "last_slowfood"
+        },
+        {
+            id: "biokonsum",
+            title: "🥦 Bio-Konsum & nachhaltige Ernährung",
+            url: "https://www.oekolandbau.de/feed/",   // BÖL
+            cacheKey: "feed_biokonsum",
+            lastUpdateKey: "last_biokonsum"
+        },
+        {
+            id: "bayernfranken",
+            title: "🏔️ Bayern & Franken Regional",
+            url: "https://www.infranken.de/rss",
+            cacheKey: "feed_bayernfranken",
+            lastUpdateKey: "last_bayernfranken"
+        },
+        {
+            id: "klima",
+            title: "🌍 Klimaschutz & CO₂-Fußabdruck",
+            url: "https://www.zeit.de/thema/klimawandel/rss",
+            cacheKey: "feed_klima",
+            lastUpdateKey: "last_klima",
+            fallbackUrl: "https://www.spiegel.de/thema/klimawandel/index.rss"
+        },
+        {
+            id: "manufaktur",
+            title: "🔨 Manufaktur & Lebensmittelhandwerk",
+            url: "https://www.deutsche-handwerks-zeitung.de/rss",
+            cacheKey: "feed_manufaktur",
+            lastUpdateKey: "last_manufaktur"
+        },
+        {
+            id: "gemeinwohl_ale",
+            title: "🏛️ Gemeinwohl & Politik (ALE Unterfranken)",
+            url: "https://www.ale-unterfranken.bayern.de/373179/index.php?layer=rss",
+            cacheKey: "feed_gemeinwohl_ale",
+            lastUpdateKey: "last_gemeinwohl_ale"
+        },
+        {
+            id: "energievision",
+            title: "⚡ Energievision Franken",
+            url: "https://energievision-franken.de/index.php/aktuelles-von-der-energievision-franken?format=feed&type=rss",
+            cacheKey: "feed_energievision",
+            lastUpdateKey: "last_energievision"
+        }
+    ];
+
+    const RSS2JSON_API = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+    // ---------- Helper: Ausgeblendete Artikel (localStorage) ----------
+    function getHiddenLinks() {
+        const hidden = localStorage.getItem("hiddenArticleLinks");
+        return hidden ? JSON.parse(hidden) : [];
+    }
+
+    function addHiddenLink(link) {
+        const current = getHiddenLinks();
+        if (!current.includes(link)) {
+            current.push(link);
+            localStorage.setItem("hiddenArticleLinks", JSON.stringify(current));
+        }
+    }
+
+    function resetHiddenLinks() {
+        localStorage.removeItem("hiddenArticleLinks");
+        // Alle Karten neu rendern
+        for (const feed of FEEDS) {
+            updateSingleFeed(feed.id, false);
+        }
+    }
+
+    // ---------- Hilfsfunktionen ----------
+    function formatDate(dateString) {
+        if (!dateString) return "Datum unbekannt";
+        try {
+            let d = new Date(dateString);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch(e) {
+            return dateString.substring(0,10);
+        }
+    }
+
+    async function fetchFeedViaProxy(feedUrl, timeoutMs = 10000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const proxyUrl = `${RSS2JSON_API}${encodeURIComponent(feedUrl)}`;
+            const response = await fetch(proxyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.status !== "ok") throw new Error(data.message || "Feed parsing error");
+            return data.items || [];
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.warn(`Feed ${feedUrl} nicht erreichbar:`, err.message);
+            throw err;
+        }
+    }
+
+    async function fetchWithFallback(feedConfig) {
+        try {
+            return await fetchFeedViaProxy(feedConfig.url);
+        } catch (err) {
+            if (feedConfig.fallbackUrl) {
+                console.log(`Primärer Feed fehlgeschlagen, versuche Fallback: ${feedConfig.fallbackUrl}`);
+                return await fetchFeedViaProxy(feedConfig.fallbackUrl);
+            }
+            throw err;
+        }
+    }
+
+    function saveFeedCache(feedId, items, timestamp) {
+        try {
+            const feed = FEEDS.find(f => f.id === feedId);
+            if (feed) {
+                localStorage.setItem(feed.cacheKey, JSON.stringify(items));
+                localStorage.setItem(feed.lastUpdateKey, timestamp);
+            }
+        } catch(e) { console.warn("localStorage voll?", e); }
+    }
+
+    function loadFeedCache(feedId) {
+        const feed = FEEDS.find(f => f.id === feedId);
+        if (!feed) return null;
+        const cached = localStorage.getItem(feed.cacheKey);
+        const lastUpdate = localStorage.getItem(feed.lastUpdateKey);
+        if (cached) {
+            try {
+                return { items: JSON.parse(cached), lastUpdate: lastUpdate || null };
+            } catch(e) { return null; }
+        }
+        return null;
+    }
+
+    // Rendern mit Berücksichtigung der ausgeblendeten Artikel
+    function renderArticles(container, articles, feedId) {
+        if (!container) return;
+        const hiddenLinks = getHiddenLinks();
+        // Filtere ausgeblendete Artikel
+        const visibleArticles = articles.filter(article => {
+            const link = article.link || "#";
+            return !hiddenLinks.includes(link);
+        });
+
+        if (!visibleArticles || visibleArticles.length === 0) {
+            container.innerHTML = '<div class="empty-state">📭 Keine sichtbaren Artikel. (Alle ausgeblendet?)</div>';
+            return;
+        }
+
+        const html = visibleArticles.map(article => {
+            const title = article.title || "Ohne Titel";
+            const link = article.link || "#";
+            const pubDate = formatDate(article.pubDate);
+            const author = article.author ? ` von ${escapeHtml(article.author)}` : '';
+            return `
+                <div class="article-item" data-link="${escapeHtml(link)}">
+                    <div class="article-content">
+                        <div class="article-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
+                        <div class="article-meta">
+                            <span>📅 ${pubDate}</span>
+                            ${author ? `<span>✍️ ${escapeHtml(author)}</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="hide-btn" title="Nicht interessant – dauerhaft ausblenden" data-link="${escapeHtml(link)}">🗑️</button>
+                </div>
+            `;
+        }).join('');
+        container.innerHTML = html;
+
+        // Event-Listener für alle Hide-Buttons
+        container.querySelectorAll('.hide-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const link = btn.getAttribute('data-link');
+                if (link) {
+                    addHiddenLink(link);
+                    // Entferne das übergeordnete .article-item aus dem DOM
+                    const articleDiv = btn.closest('.article-item');
+                    if (articleDiv) articleDiv.remove();
+                    // Optional: Prüfen, ob die Kategorie jetzt leer ist und ggf. Platzhalter anzeigen
+                    if (container.querySelectorAll('.article-item').length === 0) {
+                        container.innerHTML = '<div class="empty-state">📭 Keine sichtbaren Artikel. (Alle ausgeblendet?)</div>';
+                    }
+                }
+            });
+        });
+    }
+
+    async function updateSingleFeed(feedId, forceRefresh = false) {
+        const feed = FEEDS.find(f => f.id === feedId);
+        if (!feed) return;
+        const cardElement = document.getElementById(`card-${feedId}`);
+        const statusSpan = cardElement?.querySelector('.feed-status');
+        const listContainer = cardElement?.querySelector('.article-list');
+        const lastUpdatedSpan = cardElement?.querySelector('.last-updated span');
+
+        // Cache anzeigen (sofort)
+        const cached = loadFeedCache(feedId);
+        let currentItems = cached?.items || [];
+        let currentLastUpdate = cached?.lastUpdate || null;
+
+        if (currentItems.length > 0 && !forceRefresh) {
+            renderArticles(listContainer, currentItems, feedId);
+            if (lastUpdatedSpan && currentLastUpdate) lastUpdatedSpan.innerText = new Date(parseInt(currentLastUpdate)).toLocaleString();
+            if (statusSpan) {
+                statusSpan.innerText = `📦 zwischengespeichert (${currentItems.length})`;
+                statusSpan.className = "feed-status status-stale";
+            }
+        } else if (!forceRefresh && (!currentItems || currentItems.length === 0)) {
+            if (listContainer) listContainer.innerHTML = '<div class="empty-state">⏳ Lade Feed ...</div>';
+        }
+
+        // Live-Abruf (immer, wenn forceRefresh oder initial)
+        try {
+            if (statusSpan && !forceRefresh && currentItems.length===0) statusSpan.innerText = "🔄 wird geladen...";
+            else if (forceRefresh && statusSpan) statusSpan.innerText = "🔄 aktualisiere...";
+
+            const newItems = await fetchWithFallback(feed);
+            const timestamp = Date.now().toString();
+            const limitedItems = newItems.slice(0, 15);
+            saveFeedCache(feedId, limitedItems, timestamp);
+
+            renderArticles(listContainer, limitedItems, feedId);
+            if (lastUpdatedSpan) lastUpdatedSpan.innerText = new Date(parseInt(timestamp)).toLocaleString();
+            if (statusSpan) {
+                statusSpan.innerText = `✅ ${limitedItems.length} Artikel (live)`;
+                statusSpan.className = "feed-status status-ok";
+            }
+        } catch (error) {
+            console.error(`Feed ${feedId} Fehler:`, error);
+            const cachedAfterError = loadFeedCache(feedId);
+            if (!cachedAfterError || cachedAfterError.items.length === 0) {
+                if (listContainer) listContainer.innerHTML = `<div class="error-message">⚠️ Feed nicht erreichbar.<br>Prüfe später erneut. (Proxy evtl. überlastet)</div>`;
+                if (statusSpan) {
+                    statusSpan.innerText = "❌ Verbindungsfehler";
+                    statusSpan.className = "feed-status status-error";
+                }
+            } else {
+                if (statusSpan) {
+                    statusSpan.innerText = `⚠️ Keine Verbindung – zeige Cache (${cachedAfterError.items.length})`;
+                    statusSpan.className = "feed-status status-error";
+                }
+                if (listContainer && cachedAfterError.items.length) {
+                    renderArticles(listContainer, cachedAfterError.items, feedId);
+                }
+            }
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    function buildDashboardUI() {
+        const grid = document.getElementById('dashboardGrid');
+        grid.innerHTML = '';
+        for (const feed of FEEDS) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${feed.id}`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="category-title">
+                        ${feed.title}
+                        <span class="badge">RSS</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="feed-status" id="status-${feed.id}">⏳ wird geladen</span>
+                        <button class="refresh-feed" data-id="${feed.id}">⟳ einzeln</button>
+                    </div>
+                </div>
+                <div class="article-list" id="list-${feed.id}">
+                    <div class="empty-state">Lade initiale Daten...</div>
+                </div>
+                <div class="last-updated">
+                    Letzte Aktualisierung: <span>—</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        }
+
+        document.querySelectorAll('.refresh-feed').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const feedId = btn.getAttribute('data-id');
+                updateSingleFeed(feedId, true);
+            });
+        });
+
+        for (const feed of FEEDS) {
+            updateSingleFeed(feed.id, false);
+        }
+    }
+
+    async function refreshAllFeeds() {
+        const promises = FEEDS.map(feed => updateSingleFeed(feed.id, true));
+        await Promise.allSettled(promises);
+    }
+
+    document.getElementById('refreshAllBtn')?.addEventListener('click', refreshAllFeeds);
+    document.getElementById('resetHiddenBtn')?.addEventListener('click', () => {
+        resetHiddenLinks();
+        // Alle Karten neu rendern mit aktuellen Caches
+        for (const feed of FEEDS) {
+            const cached = loadFeedCache(feed.id);
+            if (cached && cached.items.length) {
+                const listContainer = document.querySelector(`#card-${feed.id} .article-list`);
+                if (listContainer) renderArticles(listContainer, cached.items, feed.id);
+            } else {
+                updateSingleFeed(feed.id, false);
+            }
+        }
+    });
+
+    buildDashboardUI();
+</script>
+</body>
+</html>
