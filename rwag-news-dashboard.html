@@ -1,381 +1,481 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Regionalwert AG Franken – News Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --gruen: #1f5c2a; --gruen-mid: #2d7a3c; --gruen-light: #4a9e5c;
-      --gruen-bg: #f0f7f1; --gruen-pale: #e4f0e6; --akzent: #c8860a;
-      --text: #1a1a1a; --text-muted: #5a6b5c; --border: #cce0cc;
-      --bg: #f8fdf8; --white: #ffffff; --error-bg: #fff8f0; --error-border: #e0b87a;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
-      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.55;
-    }
-    header {
-      background: var(--gruen); color: var(--white); padding: .9rem 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100; box-shadow: 0 3px 12px rgba(0,0,0,.25);
-      gap: 1rem;
-    }
-    .header-brand { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
-    .header-brand .name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; }
-    .header-brand .sub { font-size: .78rem; opacity: .6; }
-    .header-right { display: flex; align-items: center; gap: .8rem; flex-shrink: 0; }
-    #status-badge { font-size: .75rem; opacity: .7; max-width: 240px; text-align: right; }
-    #refresh-btn {
-      background: transparent; border: 1px solid rgba(255,255,255,.45); color: var(--white);
-      padding: .3rem .85rem; border-radius: 4px; cursor: pointer; font-size: .82rem;
-      transition: background .15s; white-space: nowrap;
-    }
-    #refresh-btn:hover { background: rgba(255,255,255,.18); }
-    #refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .topics-strip {
-      background: var(--gruen-pale); border-bottom: 1px solid var(--border);
-      padding: .45rem 2rem; font-size: .76rem; color: var(--gruen); font-weight: 600;
-      display: flex; gap: 1.2rem; flex-wrap: wrap;
-    }
-    .topics-strip span::before { content: '✦ '; opacity: .5; }
-    main { max-width: 980px; margin: 0 auto; padding: 1.8rem 1.2rem 4rem; }
-    .feed-group { margin-bottom: 3rem; }
-    .feed-group h2 {
-      font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;
-      font-style: italic; text-decoration: underline; text-underline-offset: 4px;
-      text-decoration-thickness: 2px; color: var(--gruen); margin-bottom: .9rem;
-      display: flex; align-items: center; gap: .6rem; padding-bottom: .4rem;
-      border-bottom: 2px solid var(--gruen);
-    }
-    .feed-group h2 .badge {
-      font-family: 'Source Sans 3', sans-serif; font-style: normal; font-size: .72rem;
-      font-weight: 600; background: var(--akzent); color: var(--white);
-      padding: .1rem .45rem; border-radius: 10px;
-    }
-    .item-list {
-      list-style: none; background: var(--white); border: 1px solid var(--border);
-      border-radius: 7px; overflow: hidden; box-shadow: 0 1px 4px rgba(30,80,40,.06);
-    }
-    .item-list li {
-      display: grid; grid-template-columns: 78px 1fr; gap: 0;
-      border-bottom: 1px solid var(--gruen-pale); transition: background .1s;
-    }
-    .item-list li:last-child { border-bottom: none; }
-    .item-list li:hover { background: var(--gruen-bg); }
-    .item-date {
-      padding: .62rem .7rem .62rem .9rem; font-size: .72rem; color: var(--text-muted);
-      font-weight: 600; border-right: 1px solid var(--gruen-pale);
-    }
-    .item-body { padding: .6rem .9rem .6rem .75rem; }
-    .item-body a {
-      color: var(--gruen); text-decoration: none; font-weight: 600; font-size: .88rem;
-      display: block;
-    }
-    .item-body a:hover { color: var(--gruen-mid); text-decoration: underline; }
-    .item-desc {
-      font-size: .77rem; color: var(--text-muted); margin-top: .22rem; line-height: 1.4;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .item-source { font-size: .68rem; color: var(--akzent); margin-top: .18rem; font-weight: 600; }
-    .loading-block {
-      background: var(--white); border: 1px solid var(--border); border-radius: 7px;
-      padding: 1.4rem; text-align: center; color: var(--text-muted);
-      animation: pulse 1.6s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-    .error-notice {
-      margin-bottom: .7rem; padding: .6rem .9rem; background: var(--error-bg);
-      border: 1px solid var(--error-border); border-radius: 5px; color: #8a5000;
-      font-size: .8rem;
-    }
-    .empty-notice { padding: .7rem 1rem; color: var(--text-muted); font-size: .85rem; font-style: italic; }
-    footer {
-      text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: .75rem;
-      border-top: 1px solid var(--border); margin-top: 1rem;
-    }
-    footer a { color: var(--gruen); }
-    @media (max-width: 600px) {
-      header { padding: .75rem 1rem; } #status-badge { display: none; }
-      .topics-strip { padding: .4rem 1rem; } main { padding: 1.2rem .75rem 3rem; }
-      .item-list li { grid-template-columns: 62px 1fr; }
-      .item-date { font-size: .66rem; padding: .6rem .4rem .6rem .6rem; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News-Dashboard | Nachhaltigkeit & Handwerk</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f4f7f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #cbd5c0;
+        }
+        h1 {
+            margin: 0;
+            color: #2d4a1e;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+        .refresh-all {
+            background: #2d6a4f;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .refresh-all:hover {
+            background: #1b4d3e;
+            transform: scale(0.97);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: 0.2s;
+            border: 1px solid #e2e8d5;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header {
+            background: #eef3e8;
+            padding: 14px 20px;
+            border-bottom: 1px solid #d4e0c8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .category-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #2c5e2a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            background: #d9e6c3;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2d4a1e;
+        }
+        .feed-status {
+            font-size: 0.7rem;
+            background: #fef9e3;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-ok { background: #e0f2e2; color: #1e5620; }
+        .status-error { background: #ffe6e5; color: #b91c1c; }
+        .status-stale { background: #fff0cf; color: #a86800; }
+        .refresh-feed {
+            background: none;
+            border: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: #3b6e2b;
+            text-decoration: underline;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        .refresh-feed:hover {
+            background: #e2e8d5;
+        }
+        .article-list {
+            padding: 12px 16px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .article-item {
+            border-bottom: 1px solid #e9eddf;
+            padding-bottom: 12px;
+        }
+        .article-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .article-title {
+            font-weight: 600;
+            margin: 0 0 6px 0;
+            line-height: 1.4;
+        }
+        .article-title a {
+            text-decoration: none;
+            color: #1e3a1e;
+        }
+        .article-title a:hover {
+            text-decoration: underline;
+            color: #2b6e2b;
+        }
+        .article-meta {
+            font-size: 0.7rem;
+            color: #6b7b5e;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .error-message {
+            background: #fff2f0;
+            padding: 16px;
+            border-radius: 16px;
+            color: #b13b2d;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .last-updated {
+            font-size: 0.7rem;
+            color: #7c8f6e;
+            margin-top: 10px;
+            text-align: right;
+            border-top: 1px dashed #e2e8d5;
+            padding-top: 10px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: #8faa7b;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #7c8f6e;
+            border-top: 1px solid #dce5d0;
+            padding-top: 20px;
+        }
+        button {
+            background: none;
+            border: none;
+        }
+        @media (max-width: 700px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <div class="header-brand"><span class="name">Regionalwert AG Franken</span><span class="sub">News-Dashboard</span></div>
-  <div class="header-right"><span id="status-badge">Wird geladen…</span><button id="refresh-btn" onclick="loadAllFeeds()">↺ Aktualisieren</button></div>
-</header>
-<div class="topics-strip">
-  <span>Ökolandbau Franken</span> <span>Regionale Erzeugung</span> <span>Nachhaltigkeit</span>
-  <span>Manufaktur &amp; Handwerk</span> <span>CO₂-Fußabdruck</span> <span>Slow Food</span>
+<div class="dashboard">
+    <div class="header">
+        <h1>🌿 Teilerfolg · News-Dashboard</h1>
+        <button class="refresh-all" id="refreshAllBtn">🔄 Alle Feeds aktualisieren</button>
+    </div>
+    <div class="grid" id="dashboardGrid"></div>
+    <footer>
+        ⚡ Bei temporären Proxy-Fehlern werden die zuletzt geladenen Artikel angezeigt – kein Datenverlust.<br>
+        Klick auf „Aktualisieren“ prüft alle Feeds neu, ohne bestehende Einträge zu entfernen.
+    </footer>
 </div>
-<main id="dashboard"><div class="loading-block">⏳ Feeds werden geladen…</div></main>
-<footer>Regionalwert AG Franken — <a href="https://www.regionalwert-franken.de" target="_blank">regionalwert-franken.de</a> — News-Dashboard intern</footer>
 
 <script>
-// ======================= QUELLEN (CSV) =======================
-const CSV_DATEI = null;
-const QUELLEN_CSV = `
-# ── ÖKOLANDBAU & NACHHALTIGKEIT ──
-https://utopia.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
-https://www.biorama.eu/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
-https://www.soel.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
+    // --------------------------------------------------------------
+    // FEED KONFIGURATION (alle gültigen RSS-Quellen)
+    // Verwendet rss2json.com als stabilen CORS-Proxy (kein eigener Server nötig)
+    // --------------------------------------------------------------
+    const FEEDS = [
+        {
+            id: "oekolandbau",
+            title: "🌾 Ökolandbau & Nachhaltigkeit",
+            url: "https://utopia.de/rss/",   // RSS von Utopia
+            cacheKey: "feed_oekolandbau",
+            lastUpdateKey: "last_oekolandbau"
+        },
+        {
+            id: "agrarpolitik",
+            title: "🚜 Agrarmarkt & Agrarpolitik",
+            url: "https://www.agrarheute.com/rss",
+            cacheKey: "feed_agrarpolitik",
+            lastUpdateKey: "last_agrarpolitik"
+        },
+        {
+            id: "slowfood",
+            title: "🍽️ Slow Food & Genusskultur",
+            url: "https://www.slowfood.de/rss.xml",   // offizieller Slow Food DE Feed
+            cacheKey: "feed_slowfood",
+            lastUpdateKey: "last_slowfood"
+        },
+        {
+            id: "biokonsum",
+            title: "🥦 Bio-Konsum & nachhaltige Ernährung",
+            url: "https://www.bio-markt.info/feed",   // Bio Markt RSS
+            cacheKey: "feed_biokonsum",
+            lastUpdateKey: "last_biokonsum"
+        },
+        {
+            id: "bayernfranken",
+            title: "🏔️ Bayern & Franken Regional",
+            url: "https://www.br.de/nachrichten/regional/rss.xml", // BR Regional
+            cacheKey: "feed_bayernfranken",
+            lastUpdateKey: "last_bayernfranken"
+        },
+        {
+            id: "klima",
+            title: "🌍 Klimaschutz & CO₂-Fußabdruck",
+            url: "https://www.klimareporter.de/rss.xml",
+            cacheKey: "feed_klima",
+            lastUpdateKey: "last_klima"
+        },
+        {
+            id: "manufaktur",
+            title: "🔨 Manufaktur & Lebensmittelhandwerk",
+            url: "https://www.deutsche-handwerks-zeitung.de/rss",
+            cacheKey: "feed_manufaktur",
+            lastUpdateKey: "last_manufaktur"
+        }
+    ];
 
-# ── AGRARMARKT & AGRARPOLITIK ──
-https://www.agrarheute.com/rss,Agrarmarkt & Agrarpolitik,2026-04-05
-https://www.topagrar.com/rss/feed.xml,Agrarmarkt & Agrarpolitik,2026-04-05
+    // RSS2JSON konvertiert RSS in JSON und umgeht CORS
+    const RSS2JSON_API = "https://api.rss2json.com/v1/api.json?rss_url=";
 
-# ── SLOW FOOD & GENUSSKULTUR ──
-https://www.slowfood.de/feed/,Slow Food & Genusskultur,2026-04-05
-
-# ── BIO-KONSUM & NACHHALTIGE ERNÄHRUNG ──
-https://www.smarticular.net/feed/,Bio-Konsum & nachhaltige Ernährung,2026-04-05
-https://www.biohandel-online.de/news/feed.rss,Bio-Konsum & nachhaltige Ernährung,2026-04-05
-
-# ── BAYERN & FRANKEN REGIONAL ──
-https://www.br.de/nachrichten/wirtschaft/index.rss,Bayern & Franken Regional,2026-04-05
-https://www.mainpost.de/storage/rss/rss/top.xml,Bayern & Franken Regional,2026-04-05
-https://www.nordbayern.de/region/nuernberg/rss,Bayern & Franken Regional,2026-04-05
-
-# ── KLIMASCHUTZ & CO₂-FUSSABDRUCK ──
-https://www.nabu.de/rss/alle-news.xml,Klimaschutz & CO₂-Fußabdruck,2026-04-05
-https://www.greenpeace.de/feed,Klimaschutz & CO₂-Fußabdruck,2026-04-05
-
-# ── MANUFAKTUR & LEBENSMITTELHANDWERK ──
-https://www.deutsche-handwerks-zeitung.de/feed/,Manufaktur & Lebensmittelhandwerk,2026-04-05
-https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-05
-`;
-
-// ======================= KONFIGURATION =======================
-const MAX_PRO_GRUPPE = 15;
-const FETCH_TIMEOUT_MS = 15000;
-
-// Drei zuverlässige CORS-Proxys (rohe Text-Antwort, kein JSON-Wrapper)
-const PROXIES = [
-  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
-];
-
-// ======================= HELFER =======================
-function parseCSV(text) {
-  return text.split('\n')
-    .map(l => l.trim())
-    .filter(l => l && !l.startsWith('#'))
-    .map(l => {
-      const parts = l.split(',');
-      if (parts.length < 3) return null;
-      const url = parts[0].trim();
-      const added = parts[parts.length-1].trim();
-      const gruppe = parts.slice(1, -1).join(',').trim();
-      return { url, gruppe: gruppe || extractDomain(url), added };
-    })
-    .filter(Boolean);
-}
-function extractDomain(url) {
-  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
-}
-function groupByLabel(sources) {
-  const map = new Map();
-  for (const s of sources) map.set(s.gruppe, [...(map.get(s.gruppe)||[]), s]);
-  return map;
-}
-function stripHTML(html) {
-  if (!html) return '';
-  const d = document.createElement('div');
-  d.innerHTML = html;
-  return d.textContent || d.innerText || '';
-}
-function fmtDate(d) {
-  if (!d || isNaN(d.getTime()) || d.getTime() === 0) return '–';
-  return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
-}
-function escHTML(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function withTimeout(promise, ms) {
-  return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('Timeout')),ms))]);
-}
-
-// ======================= PARSER für RSS/XML =======================
-function parseFeedXML(xmlText, feedUrl) {
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlText, 'application/xml');
-    if (doc.querySelector('parsererror')) return [];
-    const isAtom = doc.documentElement.localName === 'feed' ||
-                   (doc.documentElement.getAttribute('xmlns')||'').includes('Atom');
-    const entries = isAtom ? [...doc.querySelectorAll('entry')] : [...doc.querySelectorAll('item')];
-    return entries.map(entry => {
-      let title, link, date, summary;
-      if (isAtom) {
-        title = entry.querySelector('title')?.textContent?.trim() || '';
-        const linkEl = entry.querySelector('link[rel="alternate"]') || entry.querySelector('link');
-        link = linkEl?.getAttribute('href') || '';
-        const ds = entry.querySelector('updated, published')?.textContent?.trim() || '';
-        date = ds ? new Date(ds) : new Date(0);
-        summary = entry.querySelector('summary, content')?.textContent?.trim() || '';
-      } else {
-        title = entry.querySelector('title')?.textContent?.trim() || '';
-        const linkEl = entry.querySelector('link');
-        link = linkEl?.textContent?.trim() || linkEl?.nextSibling?.textContent?.trim() || '';
-        if (!link || !link.startsWith('http')) link = entry.querySelector('guid')?.textContent?.trim() || '';
-        const ds = entry.querySelector('pubDate, pubdate')?.textContent?.trim() ||
-                   entry.getElementsByTagNameNS?.('http://purl.org/dc/elements/1.1/','date')[0]?.textContent?.trim() || '';
-        date = ds ? new Date(ds) : new Date(0);
-        summary = entry.querySelector('description')?.textContent?.trim() || '';
-      }
-      return {
-        title: title || '(Kein Titel)',
-        link: link || '#',
-        date: (date && !isNaN(date.getTime())) ? date : new Date(0),
-        summary: stripHTML(summary).replace(/\s+/g,' ').trim().slice(0,230),
-        domain: extractDomain(feedUrl)
-      };
-    }).filter(i => i.title && i.link !== '#');
-  } catch(e) { return []; }
-}
-
-// ======================= FETCH mit Proxy-Kette (roher Text) =======================
-async function fetchFeed(url) {
-  for (let idx = 0; idx < PROXIES.length; idx++) {
-    try {
-      const proxyUrl = PROXIES[idx](url);
-      const resp = await withTimeout(fetch(proxyUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FeedFetcher/1.0)' }
-      }), FETCH_TIMEOUT_MS);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const text = await resp.text();
-      // Prüfen, ob der Inhalt wie XML aussieht
-      if (!text.includes('<rss') && !text.includes('<feed') && !text.includes('<RDF')) {
-        throw new Error('Kein gültiges XML');
-      }
-      const items = parseFeedXML(text, url);
-      if (items.length) return { items, error: null };
-      throw new Error('Keine Items gefunden');
-    } catch(e) {
-      console.warn(`Proxy ${idx} fehlgeschlagen für ${url}:`, e.message);
-      if (idx === PROXIES.length-1) return { items: [], error: e.message };
+    // ---------- Hilfsfunktionen ----------
+    function formatDate(dateString) {
+        if (!dateString) return "Datum unbekannt";
+        try {
+            let d = new Date(dateString);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch(e) {
+            return dateString.substring(0,10);
+        }
     }
-  }
-  return { items: [], error: 'Alle Proxys fehlgeschlagen' };
-}
 
-// ======================= RENDER =======================
-function renderGroup(gruppe, items, errors, feedCount) {
-  const sec = document.createElement('section');
-  sec.className = 'feed-group';
-  const h2 = document.createElement('h2');
-  h2.innerHTML = `${escHTML(gruppe)} <span class="badge">${items.length}</span>`;
-  sec.appendChild(h2);
-  if (errors.length) {
-    const n = document.createElement('div');
-    n.className = 'error-notice';
-    n.innerHTML = `<strong>⚠ ${errors.length} von ${feedCount} Feed(s) nicht erreichbar</strong><br>
-      Proxys temporär überlastet? Klick auf "Aktualisieren" – die Feeds sind alle gültig.`;
-    sec.appendChild(n);
-  }
-  if (!items.length) {
-    const e = document.createElement('p');
-    e.className = 'empty-notice';
-    e.textContent = 'Keine Einträge gefunden. Versuche es später noch einmal.';
-    sec.appendChild(e);
-    return sec;
-  }
-  const ul = document.createElement('ul');
-  ul.className = 'item-list';
-  items.forEach(item => {
-    const li = document.createElement('li');
-    const dateEl = document.createElement('div');
-    dateEl.className = 'item-date';
-    dateEl.textContent = fmtDate(item.date);
-    const body = document.createElement('div');
-    body.className = 'item-body';
-    const a = document.createElement('a');
-    a.href = item.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
-    a.textContent = item.title;
-    body.appendChild(a);
-    if (item.summary) {
-      const desc = document.createElement('div');
-      desc.className = 'item-desc';
-      desc.textContent = item.summary;
-      body.appendChild(desc);
+    // Feed von RSS2JSON abrufen (mit Timeout)
+    async function fetchFeedViaProxy(feedUrl) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 Sek. Timeout
+        try {
+            const proxyUrl = `${RSS2JSON_API}${encodeURIComponent(feedUrl)}`;
+            const response = await fetch(proxyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.status !== "ok") throw new Error(data.message || "Feed parsing error");
+            // data.items enthalten die Artikel
+            return data.items || [];
+        } catch (err) {
+            clearTimeout(timeoutId);
+            console.warn(`Feed ${feedUrl} nicht erreichbar:`, err.message);
+            throw err;
+        }
     }
-    if (item.feedLabel && feedCount > 1) {
-      const src = document.createElement('div');
-      src.className = 'item-source';
-      src.textContent = '↳ ' + item.feedLabel;
-      body.appendChild(src);
-    }
-    li.appendChild(dateEl); li.appendChild(body); ul.appendChild(li);
-  });
-  sec.appendChild(ul);
-  return sec;
-}
-function renderLoading(gruppe) {
-  const sec = document.createElement('section');
-  sec.className = 'feed-group';
-  sec.innerHTML = `<h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--gruen);margin-bottom:.9rem;">${escHTML(gruppe)}</h2><div class="loading-block">⏳ Lade…</div>`;
-  return sec;
-}
 
-// ======================= HAUPTLADEN =======================
-async function loadAllFeeds() {
-  const btn = document.getElementById('refresh-btn');
-  const badge = document.getElementById('status-badge');
-  const dashboard = document.getElementById('dashboard');
-  btn.disabled = true;
-  badge.textContent = 'Wird geladen…';
-  dashboard.innerHTML = '';
-  let csvText = QUELLEN_CSV;
-  if (CSV_DATEI) {
-    try { const r = await fetch(CSV_DATEI); csvText = await r.text(); }
-    catch(e) { console.warn('Externe CSV nicht ladbar'); }
-  }
-  const sources = parseCSV(csvText);
-  const groups = groupByLabel(sources);
-  if (!groups.size) {
-    dashboard.innerHTML = '<p class="empty-notice">Keine Quellen konfiguriert.</p>';
-    btn.disabled = false;
-    return;
-  }
-  const placeholders = new Map();
-  for (const [gruppe] of groups) {
-    const ph = renderLoading(gruppe);
-    dashboard.appendChild(ph);
-    placeholders.set(gruppe, ph);
-  }
-  let done = 0, total = sources.length;
-  await Promise.allSettled([...groups.entries()].map(async ([gruppe, feedList]) => {
-    const results = await Promise.all(feedList.map(f => fetchFeed(f.url)));
-    let allItems = [];
-    const errors = [];
-    results.forEach((res, i) => {
-      done++;
-      badge.textContent = `${done} / ${total} Feeds geladen…`;
-      if (res.error) errors.push({ url: feedList[i].url, msg: res.error });
-      else {
-        const tagged = res.items.map(item => ({ ...item, feedLabel: feedList.length > 1 ? extractDomain(feedList[i].url) : null }));
-        allItems.push(...tagged);
-      }
-    });
-    allItems.sort((a,b) => b.date - a.date);
-    allItems = allItems.slice(0, MAX_PRO_GRUPPE);
-    const sectionEl = renderGroup(gruppe, allItems, errors, feedList.length);
-    placeholders.get(gruppe).replaceWith(sectionEl);
-  }));
-  const now = new Date().toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  badge.textContent = `Aktualisiert: ${now}`;
-  btn.disabled = false;
-}
-loadAllFeeds();
+    // Speichern im localStorage
+    function saveFeedCache(feedId, items, timestamp) {
+        try {
+            localStorage.setItem(FEEDS.find(f => f.id === feedId).cacheKey, JSON.stringify(items));
+            localStorage.setItem(FEEDS.find(f => f.id === feedId).lastUpdateKey, timestamp);
+        } catch(e) { console.warn("localStorage voll?", e); }
+    }
+
+    // Laden aus Cache
+    function loadFeedCache(feedId) {
+        const feed = FEEDS.find(f => f.id === feedId);
+        const cached = localStorage.getItem(feed.cacheKey);
+        const lastUpdate = localStorage.getItem(feed.lastUpdateKey);
+        if (cached) {
+            try {
+                return { items: JSON.parse(cached), lastUpdate: lastUpdate || null };
+            } catch(e) { return null; }
+        }
+        return null;
+    }
+
+    // Einen einzelnen Feed aktualisieren (mit Cache-Fallback)
+    async function updateSingleFeed(feedId, forceRefresh = false) {
+        const feed = FEEDS.find(f => f.id === feedId);
+        if (!feed) return;
+        const cardElement = document.getElementById(`card-${feedId}`);
+        const statusSpan = cardElement?.querySelector('.feed-status');
+        const listContainer = cardElement?.querySelector('.article-list');
+        const lastUpdatedSpan = cardElement?.querySelector('.last-updated span');
+
+        // 1. Cache sofort anzeigen (falls vorhanden)
+        const cached = loadFeedCache(feedId);
+        let currentItems = cached?.items || [];
+        let currentLastUpdate = cached?.lastUpdate || null;
+
+        if (currentItems.length > 0 && !forceRefresh) {
+            renderArticles(listContainer, currentItems);
+            if (lastUpdatedSpan && currentLastUpdate) lastUpdatedSpan.innerText = new Date(parseInt(currentLastUpdate)).toLocaleString();
+            if (statusSpan) {
+                statusSpan.innerText = `📦 zwischengespeichert (${currentItems.length})`;
+                statusSpan.className = "feed-status status-stale";
+            }
+        } else if (!forceRefresh && (!currentItems || currentItems.length === 0)) {
+            // noch nie geladen -> Ladeindikator
+            if (listContainer) listContainer.innerHTML = '<div class="empty-state">⏳ Lade Feed ...</div>';
+        }
+
+        // 2. Im Hintergrund frisch laden (immer, wenn forceRefresh oder initial)
+        try {
+            if (statusSpan && !forceRefresh && currentItems.length===0) statusSpan.innerText = "🔄 wird geladen...";
+            else if (forceRefresh && statusSpan) statusSpan.innerText = "🔄 aktualisiere...";
+
+            const newItems = await fetchFeedViaProxy(feed.url);
+            const timestamp = Date.now().toString();
+            // maximal 15 Artikel pro Feed anzeigen
+            const limitedItems = newItems.slice(0, 15);
+            saveFeedCache(feedId, limitedItems, timestamp);
+
+            // Erfolg: Rendern
+            renderArticles(listContainer, limitedItems);
+            if (lastUpdatedSpan) lastUpdatedSpan.innerText = new Date(parseInt(timestamp)).toLocaleString();
+            if (statusSpan) {
+                statusSpan.innerText = `✅ ${limitedItems.length} Artikel (live)`;
+                statusSpan.className = "feed-status status-ok";
+            }
+        } catch (error) {
+            console.error(`Feed ${feedId} Fehler:`, error);
+            // Fehlerfall: Falls kein Cache existiert, Fehlermeldung anzeigen
+            const cachedAfterError = loadFeedCache(feedId);
+            if (!cachedAfterError || cachedAfterError.items.length === 0) {
+                if (listContainer) listContainer.innerHTML = `<div class="error-message">⚠️ Feed nicht erreichbar.<br>Prüfe später erneut. (Proxy evtl. überlastet)</div>`;
+                if (statusSpan) {
+                    statusSpan.innerText = "❌ Verbindungsfehler";
+                    statusSpan.className = "feed-status status-error";
+                }
+            } else {
+                // Cache vorhanden – weiterhin anzeigen, aber Status als Fehler markieren
+                if (statusSpan) {
+                    statusSpan.innerText = `⚠️ Keine Verbindung – zeige Cache (${cachedAfterError.items.length})`;
+                    statusSpan.className = "feed-status status-error";
+                }
+                // Sicherstellen, dass Cache im UI sichtbar ist (wurde evtl. schon gemacht)
+                if (listContainer && cachedAfterError.items.length) {
+                    renderArticles(listContainer, cachedAfterError.items);
+                }
+            }
+        }
+    }
+
+    // Hilfsfunktion zum Rendern der Artikel in einen Container
+    function renderArticles(container, articles) {
+        if (!container) return;
+        if (!articles || articles.length === 0) {
+            container.innerHTML = '<div class="empty-state">📭 Keine aktuellen Artikel gefunden.</div>';
+            return;
+        }
+        const html = articles.map(article => {
+            const title = article.title || "Ohne Titel";
+            const link = article.link || "#";
+            const pubDate = formatDate(article.pubDate);
+            const author = article.author ? ` von ${article.author}` : '';
+            return `
+                <div class="article-item">
+                    <div class="article-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
+                    <div class="article-meta">
+                        <span>📅 ${pubDate}</span>
+                        ${author ? `<span>✍️ ${escapeHtml(author)}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        container.innerHTML = html;
+    }
+
+    // einfache XSS-Sicherung
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // Gesamtes Dashboard aufbauen
+    function buildDashboardUI() {
+        const grid = document.getElementById('dashboardGrid');
+        grid.innerHTML = '';
+        for (const feed of FEEDS) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${feed.id}`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="category-title">
+                        ${feed.title}
+                        <span class="badge">RSS</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="feed-status" id="status-${feed.id}">⏳ wird geladen</span>
+                        <button class="refresh-feed" data-id="${feed.id}">⟳ einzeln</button>
+                    </div>
+                </div>
+                <div class="article-list" id="list-${feed.id}">
+                    <div class="empty-state">Lade initiale Daten...</div>
+                </div>
+                <div class="last-updated">
+                    Letzte Aktualisierung: <span>—</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        }
+
+        // Event-Listener für Einzel-Refresh
+        document.querySelectorAll('.refresh-feed').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const feedId = btn.getAttribute('data-id');
+                updateSingleFeed(feedId, true);  // force refresh
+            });
+        });
+
+        // Initiales Laden aller Feeds (zuerst Cache zeigen, dann live laden)
+        for (const feed of FEEDS) {
+            updateSingleFeed(feed.id, false);
+        }
+    }
+
+    // globaler Refresh aller Feeds (force)
+    async function refreshAllFeeds() {
+        const promises = FEEDS.map(feed => updateSingleFeed(feed.id, true));
+        await Promise.allSettled(promises);
+    }
+
+    // Event für "Alle aktualisieren"
+    document.getElementById('refreshAllBtn')?.addEventListener('click', refreshAllFeeds);
+
+    // Dashboard starten
+    buildDashboardUI();
 </script>
 </body>
 </html>
