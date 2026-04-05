@@ -8,253 +8,120 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --gruen:        #1f5c2a;
-      --gruen-mid:    #2d7a3c;
-      --gruen-light:  #4a9e5c;
-      --gruen-bg:     #f0f7f1;
-      --gruen-pale:   #e4f0e6;
-      --akzent:       #c8860a;
-      --text:         #1a1a1a;
-      --text-muted:   #5a6b5c;
-      --border:       #cce0cc;
-      --bg:           #f8fdf8;
-      --white:        #ffffff;
-      --error-bg:     #fff8f0;
-      --error-border: #e0b87a;
+      --gruen: #1f5c2a; --gruen-mid: #2d7a3c; --gruen-light: #4a9e5c;
+      --gruen-bg: #f0f7f1; --gruen-pale: #e4f0e6; --akzent: #c8860a;
+      --text: #1a1a1a; --text-muted: #5a6b5c; --border: #cce0cc;
+      --bg: #f8fdf8; --white: #ffffff; --error-bg: #fff8f0; --error-border: #e0b87a;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Source Sans 3', 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 15px;
-      line-height: 1.55;
+      font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.55;
     }
     header {
-      background: var(--gruen);
-      color: var(--white);
-      padding: .9rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 3px 12px rgba(0,0,0,.25);
+      background: var(--gruen); color: var(--white); padding: .9rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 3px 12px rgba(0,0,0,.25);
       gap: 1rem;
     }
     .header-brand { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
-    .header-brand .name {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
-    .header-brand .sub {
-      font-size: .78rem;
-      opacity: .6;
-      font-weight: 300;
-    }
+    .header-brand .name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; }
+    .header-brand .sub { font-size: .78rem; opacity: .6; }
     .header-right { display: flex; align-items: center; gap: .8rem; flex-shrink: 0; }
-    #status-badge {
-      font-size: .75rem;
-      opacity: .7;
-      font-weight: 300;
-      max-width: 240px;
-      text-align: right;
-    }
+    #status-badge { font-size: .75rem; opacity: .7; max-width: 240px; text-align: right; }
     #refresh-btn {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,.45);
-      color: var(--white);
-      padding: .3rem .85rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: .82rem;
-      font-family: inherit;
-      transition: background .15s;
-      white-space: nowrap;
+      background: transparent; border: 1px solid rgba(255,255,255,.45); color: var(--white);
+      padding: .3rem .85rem; border-radius: 4px; cursor: pointer; font-size: .82rem;
+      transition: background .15s; white-space: nowrap;
     }
     #refresh-btn:hover { background: rgba(255,255,255,.18); }
     #refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
     .topics-strip {
-      background: var(--gruen-pale);
-      border-bottom: 1px solid var(--border);
-      padding: .45rem 2rem;
-      font-size: .76rem;
-      color: var(--gruen);
-      font-weight: 600;
-      display: flex;
-      gap: 1.2rem;
-      flex-wrap: wrap;
+      background: var(--gruen-pale); border-bottom: 1px solid var(--border);
+      padding: .45rem 2rem; font-size: .76rem; color: var(--gruen); font-weight: 600;
+      display: flex; gap: 1.2rem; flex-wrap: wrap;
     }
     .topics-strip span::before { content: '✦ '; opacity: .5; }
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 1.8rem 1.2rem 4rem;
-    }
-    .feed-group {
-      margin-bottom: 3rem;
-    }
+    main { max-width: 980px; margin: 0 auto; padding: 1.8rem 1.2rem 4rem; }
+    .feed-group { margin-bottom: 3rem; }
     .feed-group h2 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      font-style: italic;
-      text-decoration: underline;
-      text-underline-offset: 4px;
-      text-decoration-thickness: 2px;
-      color: var(--gruen);
-      margin-bottom: .9rem;
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      padding-bottom: .4rem;
+      font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;
+      font-style: italic; text-decoration: underline; text-underline-offset: 4px;
+      text-decoration-thickness: 2px; color: var(--gruen); margin-bottom: .9rem;
+      display: flex; align-items: center; gap: .6rem; padding-bottom: .4rem;
       border-bottom: 2px solid var(--gruen);
     }
     .feed-group h2 .badge {
-      font-family: 'Source Sans 3', sans-serif;
-      font-style: normal;
-      font-size: .72rem;
-      font-weight: 600;
-      background: var(--akzent);
-      color: var(--white);
-      padding: .1rem .45rem;
-      border-radius: 10px;
+      font-family: 'Source Sans 3', sans-serif; font-style: normal; font-size: .72rem;
+      font-weight: 600; background: var(--akzent); color: var(--white);
+      padding: .1rem .45rem; border-radius: 10px;
     }
     .item-list {
-      list-style: none;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(30,80,40,.06);
+      list-style: none; background: var(--white); border: 1px solid var(--border);
+      border-radius: 7px; overflow: hidden; box-shadow: 0 1px 4px rgba(30,80,40,.06);
     }
     .item-list li {
-      display: grid;
-      grid-template-columns: 78px 1fr;
-      gap: 0;
-      border-bottom: 1px solid var(--gruen-pale);
-      transition: background .1s;
+      display: grid; grid-template-columns: 78px 1fr; gap: 0;
+      border-bottom: 1px solid var(--gruen-pale); transition: background .1s;
     }
     .item-list li:last-child { border-bottom: none; }
     .item-list li:hover { background: var(--gruen-bg); }
     .item-date {
-      padding: .62rem .7rem .62rem .9rem;
-      font-size: .72rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      border-right: 1px solid var(--gruen-pale);
+      padding: .62rem .7rem .62rem .9rem; font-size: .72rem; color: var(--text-muted);
+      font-weight: 600; border-right: 1px solid var(--gruen-pale);
     }
-    .item-body {
-      padding: .6rem .9rem .6rem .75rem;
-    }
+    .item-body { padding: .6rem .9rem .6rem .75rem; }
     .item-body a {
-      color: var(--gruen);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: .88rem;
+      color: var(--gruen); text-decoration: none; font-weight: 600; font-size: .88rem;
       display: block;
     }
-    .item-body a:hover {
-      color: var(--gruen-mid);
-      text-decoration: underline;
-    }
+    .item-body a:hover { color: var(--gruen-mid); text-decoration: underline; }
     .item-desc {
-      font-size: .77rem;
-      color: var(--text-muted);
-      margin-top: .22rem;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      font-size: .77rem; color: var(--text-muted); margin-top: .22rem; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .item-source {
-      font-size: .68rem;
-      color: var(--akzent);
-      margin-top: .18rem;
-      font-weight: 600;
-    }
+    .item-source { font-size: .68rem; color: var(--akzent); margin-top: .18rem; font-weight: 600; }
     .loading-block {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 1.4rem;
-      text-align: center;
-      color: var(--text-muted);
+      background: var(--white); border: 1px solid var(--border); border-radius: 7px;
+      padding: 1.4rem; text-align: center; color: var(--text-muted);
       animation: pulse 1.6s ease-in-out infinite;
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
     .error-notice {
-      margin-bottom: .7rem;
-      padding: .6rem .9rem;
-      background: var(--error-bg);
-      border: 1px solid var(--error-border);
-      border-radius: 5px;
-      color: #8a5000;
+      margin-bottom: .7rem; padding: .6rem .9rem; background: var(--error-bg);
+      border: 1px solid var(--error-border); border-radius: 5px; color: #8a5000;
       font-size: .8rem;
     }
-    .empty-notice {
-      padding: .7rem 1rem;
-      color: var(--text-muted);
-      font-size: .85rem;
-      font-style: italic;
-    }
+    .empty-notice { padding: .7rem 1rem; color: var(--text-muted); font-size: .85rem; font-style: italic; }
     footer {
-      text-align: center;
-      padding: 1.5rem;
-      color: var(--text-muted);
-      font-size: .75rem;
-      border-top: 1px solid var(--border);
-      margin-top: 1rem;
+      text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: .75rem;
+      border-top: 1px solid var(--border); margin-top: 1rem;
     }
     footer a { color: var(--gruen); }
     @media (max-width: 600px) {
-      header { padding: .75rem 1rem; }
-      #status-badge { display: none; }
-      .topics-strip { padding: .4rem 1rem; }
-      main { padding: 1.2rem .75rem 3rem; }
+      header { padding: .75rem 1rem; } #status-badge { display: none; }
+      .topics-strip { padding: .4rem 1rem; } main { padding: 1.2rem .75rem 3rem; }
       .item-list li { grid-template-columns: 62px 1fr; }
       .item-date { font-size: .66rem; padding: .6rem .4rem .6rem .6rem; }
     }
   </style>
 </head>
 <body>
-
 <header>
-  <div class="header-brand">
-    <span class="name">Regionalwert AG Franken</span>
-    <span class="sub">News-Dashboard</span>
-  </div>
-  <div class="header-right">
-    <span id="status-badge">Wird geladen…</span>
-    <button id="refresh-btn" onclick="loadAllFeeds()">↺ Aktualisieren</button>
-  </div>
+  <div class="header-brand"><span class="name">Regionalwert AG Franken</span><span class="sub">News-Dashboard</span></div>
+  <div class="header-right"><span id="status-badge">Wird geladen…</span><button id="refresh-btn" onclick="loadAllFeeds()">↺ Aktualisieren</button></div>
 </header>
-
 <div class="topics-strip">
-  <span>Ökolandbau Franken</span>
-  <span>Regionale Erzeugung</span>
-  <span>Nachhaltigkeit</span>
-  <span>Manufaktur &amp; Handwerk</span>
-  <span>CO₂-Fußabdruck</span>
-  <span>Slow Food</span>
+  <span>Ökolandbau Franken</span> <span>Regionale Erzeugung</span> <span>Nachhaltigkeit</span>
+  <span>Manufaktur &amp; Handwerk</span> <span>CO₂-Fußabdruck</span> <span>Slow Food</span>
 </div>
-
-<main id="dashboard">
-  <div class="loading-block">⏳ Feeds werden geladen…</div>
-</main>
-
-<footer>
-  Regionalwert AG Franken &mdash;
-  <a href="https://www.regionalwert-franken.de" target="_blank">regionalwert-franken.de</a>
-  &mdash; News-Dashboard intern (nicht zur Veröffentlichung)
-</footer>
+<main id="dashboard"><div class="loading-block">⏳ Feeds werden geladen…</div></main>
+<footer>Regionalwert AG Franken — <a href="https://www.regionalwert-franken.de" target="_blank">regionalwert-franken.de</a> — News-Dashboard intern</footer>
 
 <script>
-// ======================= QUELLEN (CSV-ähnlich) =======================
-const CSV_DATEI = null;   // null = Inline-Modus
+// ======================= QUELLEN (CSV) =======================
+const CSV_DATEI = null;
 const QUELLEN_CSV = `
 # ── ÖKOLANDBAU & NACHHALTIGKEIT ──
 https://utopia.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
@@ -263,7 +130,7 @@ https://www.soel.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
 
 # ── AGRARMARKT & AGRARPOLITIK ──
 https://www.agrarheute.com/rss,Agrarmarkt & Agrarpolitik,2026-04-05
-https://www.topagrar.com/rss/topagrar-nachrichten.xml,Agrarmarkt & Agrarpolitik,2026-04-05
+https://www.topagrar.com/rss/feed.xml,Agrarmarkt & Agrarpolitik,2026-04-05
 
 # ── SLOW FOOD & GENUSSKULTUR ──
 https://www.slowfood.de/feed/,Slow Food & Genusskultur,2026-04-05
@@ -288,9 +155,13 @@ https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-
 
 // ======================= KONFIGURATION =======================
 const MAX_PRO_GRUPPE = 15;
-const FETCH_TIMEOUT_MS = 12000;
-const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=20&rss_url=';
-const ALLORIGINS = 'https://api.allorigins.win/get?url=';
+const FETCH_TIMEOUT_MS = 14000;
+// Drei Proxys im Fallback (rss2json -> allorigins -> corsproxy)
+const PROXIES = [
+  url => `https://api.rss2json.com/v1/api.json?count=20&rss_url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
+];
 
 // ======================= HELFER =======================
 function parseCSV(text) {
@@ -303,53 +174,44 @@ function parseCSV(text) {
       const url = parts[0].trim();
       const added = parts[parts.length-1].trim();
       const gruppe = parts.slice(1, -1).join(',').trim();
-      const label = gruppe || extractDomain(url);
-      return { url, gruppe: label, added };
+      return { url, gruppe: gruppe || extractDomain(url), added };
     })
     .filter(Boolean);
 }
-
 function extractDomain(url) {
-  try { return new URL(url).hostname.replace(/^www\./, ''); }
-  catch { return url; }
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }
-
 function groupByLabel(sources) {
   const map = new Map();
-  for (const s of sources) {
-    if (!map.has(s.gruppe)) map.set(s.gruppe, []);
-    map.get(s.gruppe).push(s);
-  }
+  for (const s of sources) map.set(s.gruppe, [...(map.get(s.gruppe)||[]), s]);
   return map;
 }
-
 function stripHTML(html) {
   if (!html) return '';
   const d = document.createElement('div');
   d.innerHTML = html;
   return d.textContent || d.innerText || '';
 }
-
 function fmtDate(d) {
   if (!d || isNaN(d.getTime()) || d.getTime() === 0) return '–';
   return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
-
 function escHTML(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('Timeout')),ms))]);
+}
 
-// ======================= RSS/XML-PARSER (Fallback) =======================
+// ======================= PARSER für XML (Fallback) =======================
 function parseFeedXML(xmlText, feedUrl) {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlText, 'application/xml');
     if (doc.querySelector('parsererror')) return [];
-
     const isAtom = doc.documentElement.localName === 'feed' ||
-                   (doc.documentElement.getAttribute('xmlns') || '').includes('Atom');
+                   (doc.documentElement.getAttribute('xmlns')||'').includes('Atom');
     const entries = isAtom ? [...doc.querySelectorAll('entry')] : [...doc.querySelectorAll('item')];
-
     return entries.map(entry => {
       let title, link, date, summary;
       if (isAtom) {
@@ -365,7 +227,7 @@ function parseFeedXML(xmlText, feedUrl) {
         link = linkEl?.textContent?.trim() || linkEl?.nextSibling?.textContent?.trim() || '';
         if (!link || !link.startsWith('http')) link = entry.querySelector('guid')?.textContent?.trim() || '';
         const ds = entry.querySelector('pubDate, pubdate')?.textContent?.trim() ||
-                   entry.getElementsByTagNameNS?.('http://purl.org/dc/elements/1.1/', 'date')[0]?.textContent?.trim() || '';
+                   entry.getElementsByTagNameNS?.('http://purl.org/dc/elements/1.1/','date')[0]?.textContent?.trim() || '';
         date = ds ? new Date(ds) : new Date(0);
         summary = entry.querySelector('description')?.textContent?.trim() || '';
       }
@@ -373,82 +235,70 @@ function parseFeedXML(xmlText, feedUrl) {
         title: title || '(Kein Titel)',
         link: link || '#',
         date: (date && !isNaN(date.getTime())) ? date : new Date(0),
-        summary: stripHTML(summary).replace(/\s+/g, ' ').trim().slice(0, 230),
+        summary: stripHTML(summary).replace(/\s+/g,' ').trim().slice(0,230),
         domain: extractDomain(feedUrl)
       };
     }).filter(i => i.title && i.link !== '#');
   } catch(e) { return []; }
 }
 
-// ======================= FETCH MIT PROXY =======================
-function withTimeout(promise, ms) {
-  const t = new Promise((_, r) => setTimeout(() => r(new Error('Timeout')), ms));
-  return Promise.race([promise, t]);
-}
-
-async function fetchViaRss2json(url) {
-  const resp = await withTimeout(fetch(RSS2JSON + encodeURIComponent(url)), FETCH_TIMEOUT_MS);
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const json = await resp.json();
-  if (json.status !== 'ok') throw new Error('rss2json: ' + (json.message || json.status));
-  return (json.items || []).map(item => ({
-    title: (item.title || '').trim() || '(Kein Titel)',
-    link: item.link || item.guid || '#',
-    date: item.pubDate ? new Date(item.pubDate) : new Date(0),
-    summary: stripHTML(item.description || item.content || '').replace(/\s+/g, ' ').trim().slice(0, 230),
-    domain: extractDomain(url)
-  })).filter(i => i.link !== '#');
-}
-
-async function fetchViaAllorigins(url) {
-  const resp = await withTimeout(fetch(ALLORIGINS + encodeURIComponent(url)), FETCH_TIMEOUT_MS);
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const json = await resp.json();
-  if (!json.contents) throw new Error('Kein Inhalt');
-  return parseFeedXML(json.contents, url);
-}
-
+// ======================= FETCH mit Proxy-Kette =======================
 async function fetchFeed(url) {
-  try {
-    const items = await fetchViaRss2json(url);
-    return { items, error: null };
-  } catch (e1) {
-    console.warn('rss2json Fehler', url, e1.message, '→ Fallback allorigins');
+  for (let idx = 0; idx < PROXIES.length; idx++) {
     try {
-      const items = await fetchViaAllorigins(url);
-      return { items, error: null };
-    } catch (e2) {
-      console.warn('allorigins Fehler', url, e2.message);
-      return { items: [], error: e1.message };
+      const proxyUrl = PROXIES[idx](url);
+      const resp = await withTimeout(fetch(proxyUrl), FETCH_TIMEOUT_MS);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      let items = [];
+      if (idx === 0) { // rss2json
+        if (data.status !== 'ok') throw new Error(data.message || 'rss2json error');
+        items = (data.items || []).map(item => ({
+          title: (item.title || '').trim() || '(Kein Titel)',
+          link: item.link || item.guid || '#',
+          date: item.pubDate ? new Date(item.pubDate) : new Date(0),
+          summary: stripHTML(item.description || item.content || '').replace(/\s+/g,' ').trim().slice(0,230),
+          domain: extractDomain(url)
+        }));
+      } else if (idx === 1) { // allorigins
+        if (!data.contents) throw new Error('Kein Inhalt');
+        items = parseFeedXML(data.contents, url);
+      } else { // corsproxy.io – liefert raw text (XML/JSON)
+        if (typeof data === 'string') items = parseFeedXML(data, url);
+        else if (data.contents) items = parseFeedXML(data.contents, url);
+        else throw new Error('Ungültige Antwort');
+      }
+      if (items.length) return { items, error: null };
+      throw new Error('Keine Items gefunden');
+    } catch(e) {
+      console.warn(`Proxy ${idx} fehlgeschlagen für ${url}:`, e.message);
+      if (idx === PROXIES.length-1) return { items: [], error: e.message };
     }
   }
+  return { items: [], error: 'Alle Proxys fehlgeschlagen' };
 }
 
-// ======================= RENDER-FUNKTIONEN =======================
+// ======================= RENDER =======================
 function renderGroup(gruppe, items, errors, feedCount) {
   const sec = document.createElement('section');
   sec.className = 'feed-group';
   const h2 = document.createElement('h2');
   h2.innerHTML = `${escHTML(gruppe)} <span class="badge">${items.length}</span>`;
   sec.appendChild(h2);
-
-  if (errors.length > 0) {
+  if (errors.length) {
     const n = document.createElement('div');
     n.className = 'error-notice';
     n.innerHTML = `<strong>⚠ ${errors.length} von ${feedCount} Feed(s) nicht erreichbar</strong><br>
-      Mögliche Ursachen: Feed-URL veraltet, CORS-Proxy nicht erreichbar.<br>
-      <em>URLs im Quellen-CSV prüfen.</em>`;
+      URLs im Quellen-CSV prüfen oder Proxys temporär überlastet.`;
     sec.appendChild(n);
   }
-
-  if (items.length === 0) {
+  if (!items.length) {
     const e = document.createElement('p');
     e.className = 'empty-notice';
-    e.textContent = 'Keine Einträge gefunden. Bitte Feed-URLs prüfen.';
+    e.textContent = 'Keine Einträge gefunden.';
     sec.appendChild(e);
     return sec;
   }
-
   const ul = document.createElement('ul');
   ul.className = 'item-list';
   items.forEach(item => {
@@ -459,9 +309,7 @@ function renderGroup(gruppe, items, errors, feedCount) {
     const body = document.createElement('div');
     body.className = 'item-body';
     const a = document.createElement('a');
-    a.href = item.link;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
+    a.href = item.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
     a.textContent = item.title;
     body.appendChild(a);
     if (item.summary) {
@@ -476,55 +324,44 @@ function renderGroup(gruppe, items, errors, feedCount) {
       src.textContent = '↳ ' + item.feedLabel;
       body.appendChild(src);
     }
-    li.appendChild(dateEl);
-    li.appendChild(body);
-    ul.appendChild(li);
+    li.appendChild(dateEl); li.appendChild(body); ul.appendChild(li);
   });
   sec.appendChild(ul);
   return sec;
 }
-
 function renderLoading(gruppe) {
   const sec = document.createElement('section');
   sec.className = 'feed-group';
-  sec.innerHTML = `<h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--gruen);margin-bottom:.9rem;">${escHTML(gruppe)}</h2>
-    <div class="loading-block">⏳ Lade…</div>`;
+  sec.innerHTML = `<h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--gruen);margin-bottom:.9rem;">${escHTML(gruppe)}</h2><div class="loading-block">⏳ Lade…</div>`;
   return sec;
 }
 
-// ======================= HAUPTLADEFUNKTION =======================
+// ======================= HAUPTLADEN =======================
 async function loadAllFeeds() {
   const btn = document.getElementById('refresh-btn');
   const badge = document.getElementById('status-badge');
   const dashboard = document.getElementById('dashboard');
-
   btn.disabled = true;
   badge.textContent = 'Wird geladen…';
   dashboard.innerHTML = '';
-
   let csvText = QUELLEN_CSV;
   if (CSV_DATEI) {
-    try {
-      const r = await fetch(CSV_DATEI);
-      csvText = await r.text();
-    } catch(e) { console.warn('Externe CSV nicht ladbar, nutze Inline.'); }
+    try { const r = await fetch(CSV_DATEI); csvText = await r.text(); }
+    catch(e) { console.warn('Externe CSV nicht ladbar'); }
   }
-
   const sources = parseCSV(csvText);
   const groups = groupByLabel(sources);
-  if (groups.size === 0) {
+  if (!groups.size) {
     dashboard.innerHTML = '<p class="empty-notice">Keine Quellen konfiguriert.</p>';
     btn.disabled = false;
     return;
   }
-
   const placeholders = new Map();
   for (const [gruppe] of groups) {
     const ph = renderLoading(gruppe);
     dashboard.appendChild(ph);
     placeholders.set(gruppe, ph);
   }
-
   let done = 0, total = sources.length;
   await Promise.allSettled([...groups.entries()].map(async ([gruppe, feedList]) => {
     const results = await Promise.all(feedList.map(f => fetchFeed(f.url)));
@@ -535,11 +372,8 @@ async function loadAllFeeds() {
       badge.textContent = `${done} / ${total} Feeds geladen…`;
       if (res.error) errors.push({ url: feedList[i].url, msg: res.error });
       else {
-        const tagged = res.items.map(item => ({
-          ...item,
-          feedLabel: feedList.length > 1 ? extractDomain(feedList[i].url) : null
-        }));
-        allItems = allItems.concat(tagged);
+        const tagged = res.items.map(item => ({ ...item, feedLabel: feedList.length > 1 ? extractDomain(feedList[i].url) : null }));
+        allItems.push(...tagged);
       }
     });
     allItems.sort((a,b) => b.date - a.date);
@@ -547,13 +381,10 @@ async function loadAllFeeds() {
     const sectionEl = renderGroup(gruppe, allItems, errors, feedList.length);
     placeholders.get(gruppe).replaceWith(sectionEl);
   }));
-
   const now = new Date().toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
   badge.textContent = `Aktualisiert: ${now}`;
   btn.disabled = false;
 }
-
-// Start
 loadAllFeeds();
 </script>
 </body>
