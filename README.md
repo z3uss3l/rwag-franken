@@ -1,0 +1,2 @@
+# rwag-franken
+regionalwert franken
