@@ -13,7 +13,7 @@
       --gruen-light:  #4a9e5c;
       --gruen-bg:     #f0f7f1;
       --gruen-pale:   #e4f0e6;
-      --akzent:       #c8860a;   /* Franken-Gold */
+      --akzent:       #c8860a;
       --text:         #1a1a1a;
       --text-muted:   #5a6b5c;
       --border:       #cce0cc;
@@ -22,9 +22,7 @@
       --error-bg:     #fff8f0;
       --error-border: #e0b87a;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Source Sans 3', 'Segoe UI', Helvetica, Arial, sans-serif;
       background: var(--bg);
@@ -32,8 +30,6 @@
       font-size: 15px;
       line-height: 1.55;
     }
-
-    /* ── HEADER ── */
     header {
       background: var(--gruen);
       color: var(--white);
@@ -52,7 +48,6 @@
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 1.15rem;
       font-weight: 700;
-      letter-spacing: .01em;
     }
     .header-brand .sub {
       font-size: .78rem;
@@ -66,7 +61,6 @@
       font-weight: 300;
       max-width: 240px;
       text-align: right;
-      line-height: 1.35;
     }
     #refresh-btn {
       background: transparent;
@@ -82,8 +76,6 @@
     }
     #refresh-btn:hover { background: rgba(255,255,255,.18); }
     #refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* ── TAGS STRIP ── */
     .topics-strip {
       background: var(--gruen-pale);
       border-bottom: 1px solid var(--border);
@@ -91,25 +83,19 @@
       font-size: .76rem;
       color: var(--gruen);
       font-weight: 600;
-      letter-spacing: .04em;
       display: flex;
       gap: 1.2rem;
       flex-wrap: wrap;
     }
     .topics-strip span::before { content: '✦ '; opacity: .5; }
-
-    /* ── MAIN LAYOUT ── */
     main {
       max-width: 980px;
       margin: 0 auto;
       padding: 1.8rem 1.2rem 4rem;
     }
-
-    /* ── FEED GROUP ── */
     .feed-group {
       margin-bottom: 3rem;
     }
-
     .feed-group h2 {
       font-family: 'Playfair Display', Georgia, serif;
       font-size: 1.1rem;
@@ -126,7 +112,6 @@
       padding-bottom: .4rem;
       border-bottom: 2px solid var(--gruen);
     }
-
     .feed-group h2 .badge {
       font-family: 'Source Sans 3', sans-serif;
       font-style: normal;
@@ -136,10 +121,7 @@
       color: var(--white);
       padding: .1rem .45rem;
       border-radius: 10px;
-      text-decoration: none;
     }
-
-    /* ── ITEM LIST ── */
     .item-list {
       list-style: none;
       background: var(--white);
@@ -148,7 +130,6 @@
       overflow: hidden;
       box-shadow: 0 1px 4px rgba(30,80,40,.06);
     }
-
     .item-list li {
       display: grid;
       grid-template-columns: 78px 1fr;
@@ -158,38 +139,27 @@
     }
     .item-list li:last-child { border-bottom: none; }
     .item-list li:hover { background: var(--gruen-bg); }
-
     .item-date {
       padding: .62rem .7rem .62rem .9rem;
       font-size: .72rem;
       color: var(--text-muted);
       font-weight: 600;
-      letter-spacing: .02em;
-      line-height: 1.3;
       border-right: 1px solid var(--gruen-pale);
-      display: flex;
-      align-items: flex-start;
-      padding-top: .72rem;
     }
-
     .item-body {
       padding: .6rem .9rem .6rem .75rem;
     }
-
     .item-body a {
       color: var(--gruen);
       text-decoration: none;
       font-weight: 600;
       font-size: .88rem;
-      line-height: 1.35;
       display: block;
     }
     .item-body a:hover {
       color: var(--gruen-mid);
       text-decoration: underline;
-      text-underline-offset: 2px;
     }
-
     .item-desc {
       font-size: .77rem;
       color: var(--text-muted);
@@ -200,16 +170,12 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-
     .item-source {
       font-size: .68rem;
       color: var(--akzent);
       margin-top: .18rem;
       font-weight: 600;
-      letter-spacing: .02em;
     }
-
-    /* ── STATES ── */
     .loading-block {
       background: var(--white);
       border: 1px solid var(--border);
@@ -217,14 +183,9 @@
       padding: 1.4rem;
       text-align: center;
       color: var(--text-muted);
-      font-size: .88rem;
       animation: pulse 1.6s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: .5; }
-    }
-
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     .error-notice {
       margin-bottom: .7rem;
       padding: .6rem .9rem;
@@ -233,17 +194,13 @@
       border-radius: 5px;
       color: #8a5000;
       font-size: .8rem;
-      line-height: 1.45;
     }
-
     .empty-notice {
       padding: .7rem 1rem;
       color: var(--text-muted);
       font-size: .85rem;
       font-style: italic;
     }
-
-    /* ── FOOTER ── */
     footer {
       text-align: center;
       padding: 1.5rem;
@@ -253,7 +210,6 @@
       margin-top: 1rem;
     }
     footer a { color: var(--gruen); }
-
     @media (max-width: 600px) {
       header { padding: .75rem 1rem; }
       #status-badge { display: none; }
@@ -297,102 +253,58 @@
 </footer>
 
 <script>
-/* ================================================================
-   QUELLEN-LISTE – hier händisch bearbeitbar
-   ----------------------------------------------------------------
-   Format pro Zeile:   URL , Gruppenüberschrift , Erfasst-am
-   ----------------------------------------------------------------
-   Regeln:
-   • Zeilen mit # am Anfang = Kommentare (werden ignoriert)
-   • Leerzeilen werden ignoriert
-   • Gleiche Gruppenüberschrift = Feeds werden nahtlos zusammengeführt
-     und nach Datum sortiert (max. MAX_PRO_GRUPPE Einträge insgesamt)
-   • Wenn keine Überschrift, wird der Domainname der URL als
-     Platzhalter verwendet
-   • Das Feld "Erfasst-am" ist rein dokumentarisch (YYYY-MM-DD)
-   ----------------------------------------------------------------
-   ALTERNATIVE: Setze CSV_DATEI auf einen relativen Pfad (z. B.
-   'quellen.csv'), dann wird diese Datei geladen und QUELLEN_CSV
-   wird ignoriert. Format der externen Datei ist identisch.
-   ================================================================ */
-
-const CSV_DATEI = null;   // z. B. 'quellen.csv' – oder null für Inline-Modus
-
+// ======================= QUELLEN (CSV-ähnlich) =======================
+const CSV_DATEI = null;   // null = Inline-Modus
 const QUELLEN_CSV = `
 # ── ÖKOLANDBAU & NACHHALTIGKEIT ──
-# Utopia.de – größtes deutsches Nachhaltigkeitsportal (WordPress → /feed/ gesichert)
 https://utopia.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
-# Biorama – Bio/Nachhaltigkeitsmagazin Österreich (WordPress → /feed/ gesichert)
 https://www.biorama.eu/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
-# SÖL – Stiftung Ökologie & Landbau (WordPress)
 https://www.soel.de/feed/,Ökolandbau & Nachhaltigkeit,2026-04-05
 
 # ── AGRARMARKT & AGRARPOLITIK ──
-# Agrarheute – Hauptfeed (führendes dt. Agrarportal)
 https://www.agrarheute.com/rss,Agrarmarkt & Agrarpolitik,2026-04-05
-# top agrar – Gesamtfeed Nachrichten
 https://www.topagrar.com/rss/topagrar-nachrichten.xml,Agrarmarkt & Agrarpolitik,2026-04-05
 
 # ── SLOW FOOD & GENUSSKULTUR ──
-# Slow Food Deutschland e.V. (WordPress → /feed/ gesichert)
 https://www.slowfood.de/feed/,Slow Food & Genusskultur,2026-04-05
 
 # ── BIO-KONSUM & NACHHALTIGE ERNÄHRUNG ──
-# Smarticular – Nachhaltigkeit & Zero Waste im Alltag (WordPress)
 https://www.smarticular.net/feed/,Bio-Konsum & nachhaltige Ernährung,2026-04-05
-# BioHandel – Naturkost Fachmagazin
 https://www.biohandel-online.de/news/feed.rss,Bio-Konsum & nachhaltige Ernährung,2026-04-05
 
 # ── BAYERN & FRANKEN REGIONAL ──
-# BR24 Wirtschaft – Bayerischer Rundfunk (gesicherter RSS-Endpunkt)
 https://www.br.de/nachrichten/wirtschaft/index.rss,Bayern & Franken Regional,2026-04-05
-# Main-Post – Regionalzeitung Unterfranken/Mainfranken
 https://www.mainpost.de/storage/rss/rss/top.xml,Bayern & Franken Regional,2026-04-05
-# Nordbayern.de – Nürnberg/Mittelfranken
 https://www.nordbayern.de/region/nuernberg/rss,Bayern & Franken Regional,2026-04-05
 
 # ── KLIMASCHUTZ & CO₂-FUSSABDRUCK ──
-# NABU – Naturschutzbund (gesicherter RSS-Endpunkt)
 https://www.nabu.de/rss/alle-news.xml,Klimaschutz & CO₂-Fußabdruck,2026-04-05
-# Greenpeace Deutschland (WordPress)
 https://www.greenpeace.de/feed,Klimaschutz & CO₂-Fußabdruck,2026-04-05
 
 # ── MANUFAKTUR & LEBENSMITTELHANDWERK ──
-# Deutsche Handwerkszeitung (WordPress → /feed/ gesichert)
 https://www.deutsche-handwerks-zeitung.de/feed/,Manufaktur & Lebensmittelhandwerk,2026-04-05
-# Lebensmittelpraxis – Fachportal LEH
 https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-05
 `;
 
-/* ================================================================
-   KONFIGURATION
-   ================================================================ */
-const MAX_PRO_GRUPPE = 15;    // Max. Einträge pro Gruppenabschnitt
+// ======================= KONFIGURATION =======================
+const MAX_PRO_GRUPPE = 15;
 const FETCH_TIMEOUT_MS = 12000;
-
-// rss2json: zweckgebundener RSS-CORS-Proxy, kostenlos bis 10k req/Tag
 const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=20&rss_url=';
-// Fallback: allorigins (generischer Proxy + eigenes XML-Parsing)
 const ALLORIGINS = 'https://api.allorigins.win/get?url=';
 
-/* ================================================================
-   CSV PARSER
-   ================================================================ */
+// ======================= HELFER =======================
 function parseCSV(text) {
-  return text
-    .split('\n')
+  return text.split('\n')
     .map(l => l.trim())
     .filter(l => l && !l.startsWith('#'))
     .map(l => {
-      // Split: erste Spalte = URL, letzte = Datum, alles dazwischen = Gruppe
       const parts = l.split(',');
       if (parts.length < 3) return null;
-      const url    = parts[0].trim();
-      const added  = parts[parts.length - 1].trim();
+      const url = parts[0].trim();
+      const added = parts[parts.length-1].trim();
       const gruppe = parts.slice(1, -1).join(',').trim();
-      // Wenn keine Gruppe angegeben, Domainnamen als Platzhalter
-      const label  = gruppe || extractDomain(url);
-      return url ? { url, gruppe: label, added } : null;
+      const label = gruppe || extractDomain(url);
+      return { url, gruppe: label, added };
     })
     .filter(Boolean);
 }
@@ -411,62 +323,6 @@ function groupByLabel(sources) {
   return map;
 }
 
-/* ================================================================
-   XML / RSS / ATOM PARSER
-   ================================================================ */
-function parseFeedXML(xmlText, feedUrl) {
-  try {
-    const parser  = new DOMParser();
-    const doc     = parser.parseFromString(xmlText, 'application/xml');
-    if (doc.querySelector('parsererror')) return [];
-
-    const isAtom = doc.documentElement.localName === 'feed' ||
-                   (doc.documentElement.getAttribute('xmlns') || '').includes('Atom');
-
-    const entries = isAtom
-      ? [...doc.querySelectorAll('entry')]
-      : [...doc.querySelectorAll('item')];
-
-    return entries.map(entry => {
-      let title, link, date, summary;
-
-      if (isAtom) {
-        title = entry.querySelector('title')?.textContent?.trim() || '';
-        const linkEl = entry.querySelector('link[rel="alternate"]') ||
-                       entry.querySelector('link:not([rel="self"]):not([rel="enclosure"])') ||
-                       entry.querySelector('link');
-        link  = linkEl?.getAttribute('href') || '';
-        const ds = entry.querySelector('updated, published')?.textContent?.trim() || '';
-        date  = ds ? new Date(ds) : new Date(0);
-        summary = entry.querySelector('summary, content')?.textContent?.trim() || '';
-      } else {
-        title = entry.querySelector('title')?.textContent?.trim() || '';
-        const linkEl = entry.querySelector('link');
-        // RSS <link> ist Text-Inhalt, kein Attribut
-        link  = linkEl?.textContent?.trim() || linkEl?.nextSibling?.textContent?.trim() || '';
-        if (!link || !link.startsWith('http')) {
-          link = entry.querySelector('guid')?.textContent?.trim() || '';
-        }
-        const ds = entry.querySelector('pubDate, pubdate')?.textContent?.trim() ||
-                   entry.getElementsByTagNameNS?.('http://purl.org/dc/elements/1.1/', 'date')[0]?.textContent?.trim() || '';
-        date  = ds ? new Date(ds) : new Date(0);
-        summary = entry.querySelector('description')?.textContent?.trim() || '';
-      }
-
-      return {
-        title:   title   || '(Kein Titel)',
-        link:    link    || '#',
-        date:    (date && !isNaN(date.getTime())) ? date : new Date(0),
-        summary: stripHTML(summary).replace(/\s+/g, ' ').trim().slice(0, 230),
-        domain:  extractDomain(feedUrl)
-      };
-    }).filter(i => i.title && i.link !== '#');
-
-  } catch (e) {
-    return [];
-  }
-}
-
 function stripHTML(html) {
   if (!html) return '';
   const d = document.createElement('div');
@@ -474,9 +330,57 @@ function stripHTML(html) {
   return d.textContent || d.innerText || '';
 }
 
-/* ================================================================
-   FETCH – rss2json primär, allorigins+XML als Fallback
-   ================================================================ */
+function fmtDate(d) {
+  if (!d || isNaN(d.getTime()) || d.getTime() === 0) return '–';
+  return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function escHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ======================= RSS/XML-PARSER (Fallback) =======================
+function parseFeedXML(xmlText, feedUrl) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'application/xml');
+    if (doc.querySelector('parsererror')) return [];
+
+    const isAtom = doc.documentElement.localName === 'feed' ||
+                   (doc.documentElement.getAttribute('xmlns') || '').includes('Atom');
+    const entries = isAtom ? [...doc.querySelectorAll('entry')] : [...doc.querySelectorAll('item')];
+
+    return entries.map(entry => {
+      let title, link, date, summary;
+      if (isAtom) {
+        title = entry.querySelector('title')?.textContent?.trim() || '';
+        const linkEl = entry.querySelector('link[rel="alternate"]') || entry.querySelector('link');
+        link = linkEl?.getAttribute('href') || '';
+        const ds = entry.querySelector('updated, published')?.textContent?.trim() || '';
+        date = ds ? new Date(ds) : new Date(0);
+        summary = entry.querySelector('summary, content')?.textContent?.trim() || '';
+      } else {
+        title = entry.querySelector('title')?.textContent?.trim() || '';
+        const linkEl = entry.querySelector('link');
+        link = linkEl?.textContent?.trim() || linkEl?.nextSibling?.textContent?.trim() || '';
+        if (!link || !link.startsWith('http')) link = entry.querySelector('guid')?.textContent?.trim() || '';
+        const ds = entry.querySelector('pubDate, pubdate')?.textContent?.trim() ||
+                   entry.getElementsByTagNameNS?.('http://purl.org/dc/elements/1.1/', 'date')[0]?.textContent?.trim() || '';
+        date = ds ? new Date(ds) : new Date(0);
+        summary = entry.querySelector('description')?.textContent?.trim() || '';
+      }
+      return {
+        title: title || '(Kein Titel)',
+        link: link || '#',
+        date: (date && !isNaN(date.getTime())) ? date : new Date(0),
+        summary: stripHTML(summary).replace(/\s+/g, ' ').trim().slice(0, 230),
+        domain: extractDomain(feedUrl)
+      };
+    }).filter(i => i.title && i.link !== '#');
+  } catch(e) { return []; }
+}
+
+// ======================= FETCH MIT PROXY =======================
 function withTimeout(promise, ms) {
   const t = new Promise((_, r) => setTimeout(() => r(new Error('Timeout')), ms));
   return Promise.race([promise, t]);
@@ -488,11 +392,11 @@ async function fetchViaRss2json(url) {
   const json = await resp.json();
   if (json.status !== 'ok') throw new Error('rss2json: ' + (json.message || json.status));
   return (json.items || []).map(item => ({
-    title:   (item.title || '').trim() || '(Kein Titel)',
-    link:    item.link || item.guid || '#',
-    date:    item.pubDate ? new Date(item.pubDate) : new Date(0),
+    title: (item.title || '').trim() || '(Kein Titel)',
+    link: item.link || item.guid || '#',
+    date: item.pubDate ? new Date(item.pubDate) : new Date(0),
     summary: stripHTML(item.description || item.content || '').replace(/\s+/g, ' ').trim().slice(0, 230),
-    domain:  extractDomain(url)
+    domain: extractDomain(url)
   })).filter(i => i.link !== '#');
 }
 
@@ -509,93 +413,73 @@ async function fetchFeed(url) {
     const items = await fetchViaRss2json(url);
     return { items, error: null };
   } catch (e1) {
-    console.warn('rss2json Fehler für', url, '–', e1.message, '→ Fallback allorigins');
+    console.warn('rss2json Fehler', url, e1.message, '→ Fallback allorigins');
     try {
       const items = await fetchViaAllorigins(url);
       return { items, error: null };
     } catch (e2) {
-      console.warn('allorigins Fehler für', url, '–', e2.message);
+      console.warn('allorigins Fehler', url, e2.message);
       return { items: [], error: e1.message };
     }
   }
 }
 
-/* ================================================================
-   DATUM FORMATIERUNG
-   ================================================================ */
-function fmtDate(d) {
-  if (!d || isNaN(d.getTime()) || d.getTime() === 0) return '–';
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
-}
-
-/* ================================================================
-   RENDER FUNKTIONEN
-   ================================================================ */
+// ======================= RENDER-FUNKTIONEN =======================
 function renderGroup(gruppe, items, errors, feedCount) {
   const sec = document.createElement('section');
   sec.className = 'feed-group';
-
   const h2 = document.createElement('h2');
   h2.innerHTML = `${escHTML(gruppe)} <span class="badge">${items.length}</span>`;
   sec.appendChild(h2);
 
-  // Fehlerhinweis wenn nötig
   if (errors.length > 0) {
     const n = document.createElement('div');
     n.className = 'error-notice';
-    n.innerHTML = `<strong>⚠ ${errors.length} von ${feedCount} Feed(s) nicht erreichbar</strong><br>` +
-      `Mögliche Ursachen: Feed-URL veraltet, CORS-Proxy nicht erreichbar, oder Feed existiert nicht.<br>` +
-      `<em>URLs bitte im Quellen-CSV prüfen und ggf. anpassen.</em>`;
+    n.innerHTML = `<strong>⚠ ${errors.length} von ${feedCount} Feed(s) nicht erreichbar</strong><br>
+      Mögliche Ursachen: Feed-URL veraltet, CORS-Proxy nicht erreichbar.<br>
+      <em>URLs im Quellen-CSV prüfen.</em>`;
     sec.appendChild(n);
   }
 
   if (items.length === 0) {
     const e = document.createElement('p');
     e.className = 'empty-notice';
-    e.textContent = 'Keine Einträge gefunden. Bitte Feed-URLs im CSV prüfen.';
+    e.textContent = 'Keine Einträge gefunden. Bitte Feed-URLs prüfen.';
     sec.appendChild(e);
     return sec;
   }
 
   const ul = document.createElement('ul');
   ul.className = 'item-list';
-
   items.forEach(item => {
     const li = document.createElement('li');
-
     const dateEl = document.createElement('div');
     dateEl.className = 'item-date';
     dateEl.textContent = fmtDate(item.date);
-
     const body = document.createElement('div');
     body.className = 'item-body';
-
     const a = document.createElement('a');
-    a.href   = item.link;
+    a.href = item.link;
     a.target = '_blank';
-    a.rel    = 'noopener noreferrer';
+    a.rel = 'noopener noreferrer';
     a.textContent = item.title;
     body.appendChild(a);
-
     if (item.summary) {
       const desc = document.createElement('div');
       desc.className = 'item-desc';
       desc.textContent = item.summary;
       body.appendChild(desc);
     }
-
     if (item.feedLabel && feedCount > 1) {
       const src = document.createElement('div');
       src.className = 'item-source';
       src.textContent = '↳ ' + item.feedLabel;
       body.appendChild(src);
     }
-
     li.appendChild(dateEl);
     li.appendChild(body);
     ul.appendChild(li);
   });
-
   sec.appendChild(ul);
   return sec;
 }
@@ -603,49 +487,37 @@ function renderGroup(gruppe, items, errors, feedCount) {
 function renderLoading(gruppe) {
   const sec = document.createElement('section');
   sec.className = 'feed-group';
-  sec.innerHTML = `<h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
-    font-style:italic;color:var(--gruen);margin-bottom:.9rem;">${escHTML(gruppe)}</h2>
+  sec.innerHTML = `<h2 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;font-style:italic;color:var(--gruen);margin-bottom:.9rem;">${escHTML(gruppe)}</h2>
     <div class="loading-block">⏳ Lade…</div>`;
   return sec;
 }
 
-function escHTML(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-/* ================================================================
-   MAIN LOAD
-   ================================================================ */
+// ======================= HAUPTLADEFUNKTION =======================
 async function loadAllFeeds() {
-  const btn       = document.getElementById('refresh-btn');
-  const badge     = document.getElementById('status-badge');
+  const btn = document.getElementById('refresh-btn');
+  const badge = document.getElementById('status-badge');
   const dashboard = document.getElementById('dashboard');
 
-  btn.disabled  = true;
+  btn.disabled = true;
   badge.textContent = 'Wird geladen…';
   dashboard.innerHTML = '';
 
-  // CSV laden (inline oder Datei)
   let csvText = QUELLEN_CSV;
   if (CSV_DATEI) {
     try {
       const r = await fetch(CSV_DATEI);
       csvText = await r.text();
-    } catch (e) {
-      console.warn('Externe CSV nicht ladbar, nutze Inline-CSV:', e.message);
-    }
+    } catch(e) { console.warn('Externe CSV nicht ladbar, nutze Inline.'); }
   }
 
   const sources = parseCSV(csvText);
-  const groups  = groupByLabel(sources);
-
+  const groups = groupByLabel(sources);
   if (groups.size === 0) {
-    dashboard.innerHTML = '<p class="empty-notice">Keine Quellen konfiguriert. Bitte QUELLEN_CSV befüllen.</p>';
+    dashboard.innerHTML = '<p class="empty-notice">Keine Quellen konfiguriert.</p>';
     btn.disabled = false;
     return;
   }
 
-  // Platzhalter-Sektionen in Reihenfolge anlegen
   const placeholders = new Map();
   for (const [gruppe] of groups) {
     const ph = renderLoading(gruppe);
@@ -654,20 +526,15 @@ async function loadAllFeeds() {
   }
 
   let done = 0, total = sources.length;
-
-  // Alle Gruppen parallel laden
   await Promise.allSettled([...groups.entries()].map(async ([gruppe, feedList]) => {
     const results = await Promise.all(feedList.map(f => fetchFeed(f.url)));
-
     let allItems = [];
     const errors = [];
-
     results.forEach((res, i) => {
       done++;
       badge.textContent = `${done} / ${total} Feeds geladen…`;
-      if (res.error) {
-        errors.push({ url: feedList[i].url, msg: res.error });
-      } else {
+      if (res.error) errors.push({ url: feedList[i].url, msg: res.error });
+      else {
         const tagged = res.items.map(item => ({
           ...item,
           feedLabel: feedList.length > 1 ? extractDomain(feedList[i].url) : null
@@ -675,24 +542,18 @@ async function loadAllFeeds() {
         allItems = allItems.concat(tagged);
       }
     });
-
-    // Sortieren nach Datum (neueste zuerst), auf MAX_PRO_GRUPPE kürzen
-    allItems.sort((a, b) => b.date - a.date);
+    allItems.sort((a,b) => b.date - a.date);
     allItems = allItems.slice(0, MAX_PRO_GRUPPE);
-
     const sectionEl = renderGroup(gruppe, allItems, errors, feedList.length);
     placeholders.get(gruppe).replaceWith(sectionEl);
   }));
 
-  const now = new Date().toLocaleString('de-DE', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
+  const now = new Date().toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
   badge.textContent = `Aktualisiert: ${now}`;
   btn.disabled = false;
 }
 
-// Beim Laden automatisch starten
+// Start
 loadAllFeeds();
 </script>
 </body>
