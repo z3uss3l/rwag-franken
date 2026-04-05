@@ -155,12 +155,13 @@ https://www.lebensmittelpraxis.de/rss,Manufaktur & Lebensmittelhandwerk,2026-04-
 
 // ======================= KONFIGURATION =======================
 const MAX_PRO_GRUPPE = 15;
-const FETCH_TIMEOUT_MS = 14000;
-// Drei Proxys im Fallback (rss2json -> allorigins -> corsproxy)
+const FETCH_TIMEOUT_MS = 15000;
+
+// Drei zuverlässige CORS-Proxys (rohe Text-Antwort, kein JSON-Wrapper)
 const PROXIES = [
-  url => `https://api.rss2json.com/v1/api.json?count=20&rss_url=${encodeURIComponent(url)}`,
-  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
 ];
 
 // ======================= HELFER =======================
@@ -203,7 +204,7 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('Timeout')),ms))]);
 }
 
-// ======================= PARSER für XML (Fallback) =======================
+// ======================= PARSER für RSS/XML =======================
 function parseFeedXML(xmlText, feedUrl) {
   try {
     const parser = new DOMParser();
@@ -242,32 +243,21 @@ function parseFeedXML(xmlText, feedUrl) {
   } catch(e) { return []; }
 }
 
-// ======================= FETCH mit Proxy-Kette =======================
+// ======================= FETCH mit Proxy-Kette (roher Text) =======================
 async function fetchFeed(url) {
   for (let idx = 0; idx < PROXIES.length; idx++) {
     try {
       const proxyUrl = PROXIES[idx](url);
-      const resp = await withTimeout(fetch(proxyUrl), FETCH_TIMEOUT_MS);
+      const resp = await withTimeout(fetch(proxyUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FeedFetcher/1.0)' }
+      }), FETCH_TIMEOUT_MS);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      let items = [];
-      if (idx === 0) { // rss2json
-        if (data.status !== 'ok') throw new Error(data.message || 'rss2json error');
-        items = (data.items || []).map(item => ({
-          title: (item.title || '').trim() || '(Kein Titel)',
-          link: item.link || item.guid || '#',
-          date: item.pubDate ? new Date(item.pubDate) : new Date(0),
-          summary: stripHTML(item.description || item.content || '').replace(/\s+/g,' ').trim().slice(0,230),
-          domain: extractDomain(url)
-        }));
-      } else if (idx === 1) { // allorigins
-        if (!data.contents) throw new Error('Kein Inhalt');
-        items = parseFeedXML(data.contents, url);
-      } else { // corsproxy.io – liefert raw text (XML/JSON)
-        if (typeof data === 'string') items = parseFeedXML(data, url);
-        else if (data.contents) items = parseFeedXML(data.contents, url);
-        else throw new Error('Ungültige Antwort');
+      const text = await resp.text();
+      // Prüfen, ob der Inhalt wie XML aussieht
+      if (!text.includes('<rss') && !text.includes('<feed') && !text.includes('<RDF')) {
+        throw new Error('Kein gültiges XML');
       }
+      const items = parseFeedXML(text, url);
       if (items.length) return { items, error: null };
       throw new Error('Keine Items gefunden');
     } catch(e) {
@@ -289,13 +279,13 @@ function renderGroup(gruppe, items, errors, feedCount) {
     const n = document.createElement('div');
     n.className = 'error-notice';
     n.innerHTML = `<strong>⚠ ${errors.length} von ${feedCount} Feed(s) nicht erreichbar</strong><br>
-      URLs im Quellen-CSV prüfen oder Proxys temporär überlastet.`;
+      Proxys temporär überlastet? Klick auf "Aktualisieren" – die Feeds sind alle gültig.`;
     sec.appendChild(n);
   }
   if (!items.length) {
     const e = document.createElement('p');
     e.className = 'empty-notice';
-    e.textContent = 'Keine Einträge gefunden.';
+    e.textContent = 'Keine Einträge gefunden. Versuche es später noch einmal.';
     sec.appendChild(e);
     return sec;
   }
