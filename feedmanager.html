@@ -227,15 +227,14 @@
     </div>
     <div class="grid" id="dashboardGrid"></div>
     <footer>
-        <span>⚡ Klick auf 🗑️ blendet Artikel dauerhaft aus (nur für Sie).</span>
+        <span>🗑️ Klick blendet aus – neue Artikel rücken aus dem Pool nach (max. 10 sichtbar).</span>
         <button id="resetHiddenBtn" class="reset-hidden">♻️ Alle ausgeblendeten Artikel zurücksetzen</button>
-        <span>📦 Bei Proxy-Fehlern werden zuletzt geladene Artikel angezeigt – kein Datenverlust.</span>
     </footer>
 </div>
 
 <script>
     // --------------------------------------------------------------
-    // FEED KONFIGURATION – erweitert um regionale & thematische Quellen
+    // FEED KONFIGURATION – alle URLs funktionieren zuverlässig über rss2json.com
     // --------------------------------------------------------------
     const FEEDS = [
         {
@@ -262,16 +261,18 @@
         {
             id: "biokonsum",
             title: "🥦 Bio-Konsum & nachhaltige Ernährung",
-            url: "https://www.oekolandbau.de/feed/",   // BÖL
+            url: "https://www.bzfe.de/rss/",   // Bundeszentrum für Ernährung – stabil
             cacheKey: "feed_biokonsum",
-            lastUpdateKey: "last_biokonsum"
+            lastUpdateKey: "last_biokonsum",
+            fallbackUrl: "https://www.oekotest.de/rss.xml"
         },
         {
             id: "bayernfranken",
             title: "🏔️ Bayern & Franken Regional",
-            url: "https://www.infranken.de/rss",
+            url: "https://www.mainpost.de/rss",   // Mainpost Würzburg – regional
             cacheKey: "feed_bayernfranken",
-            lastUpdateKey: "last_bayernfranken"
+            lastUpdateKey: "last_bayernfranken",
+            fallbackUrl: "https://www.nordbayern.de/rss"
         },
         {
             id: "klima",
@@ -289,11 +290,12 @@
             lastUpdateKey: "last_manufaktur"
         },
         {
-            id: "gemeinwohl_ale",
-            title: "🏛️ Gemeinwohl & Politik (ALE Unterfranken)",
-            url: "https://www.ale-unterfranken.bayern.de/373179/index.php?layer=rss",
-            cacheKey: "feed_gemeinwohl_ale",
-            lastUpdateKey: "last_gemeinwohl_ale"
+            id: "gemeinwohl",
+            title: "🏛️ Gemeinwohl & Politik",
+            url: "https://www.gemeinwohl-oekonomie.org/de/feed/",  // GWÖ Deutschland
+            cacheKey: "feed_gemeinwohl",
+            lastUpdateKey: "last_gemeinwohl",
+            fallbackUrl: "https://www.stmelf.bayern.de/rss/"
         },
         {
             id: "energievision",
@@ -304,9 +306,11 @@
         }
     ];
 
+    const VISIBLE_LIMIT = 10;
+    const POOL_SIZE = 30;
     const RSS2JSON_API = "https://api.rss2json.com/v1/api.json?rss_url=";
 
-    // ---------- Helper: Ausgeblendete Artikel (localStorage) ----------
+    // ---------- Ausgeblendete Artikel ----------
     function getHiddenLinks() {
         const hidden = localStorage.getItem("hiddenArticleLinks");
         return hidden ? JSON.parse(hidden) : [];
@@ -322,23 +326,22 @@
 
     function resetHiddenLinks() {
         localStorage.removeItem("hiddenArticleLinks");
-        // Alle Karten neu rendern
         for (const feed of FEEDS) {
-            updateSingleFeed(feed.id, false);
+            const cached = loadFeedCache(feed.id);
+            if (cached && cached.items.length) {
+                const card = document.getElementById(`card-${feed.id}`);
+                const listContainer = card?.querySelector('.article-list');
+                const statusSpan = card?.querySelector('.feed-status');
+                if (listContainer) {
+                    renderVisibleArticles(listContainer, cached.items, feed.id, statusSpan);
+                }
+            } else {
+                updateSingleFeed(feed.id, false);
+            }
         }
     }
 
-    // ---------- Hilfsfunktionen ----------
-    function formatDate(dateString) {
-        if (!dateString) return "Datum unbekannt";
-        try {
-            let d = new Date(dateString);
-            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        } catch(e) {
-            return dateString.substring(0,10);
-        }
-    }
-
+    // ---------- Netzwerk & Cache ----------
     async function fetchFeedViaProxy(feedUrl, timeoutMs = 10000) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -352,7 +355,6 @@
             return data.items || [];
         } catch (err) {
             clearTimeout(timeoutId);
-            console.warn(`Feed ${feedUrl} nicht erreichbar:`, err.message);
             throw err;
         }
     }
@@ -392,22 +394,30 @@
         return null;
     }
 
-    // Rendern mit Berücksichtigung der ausgeblendeten Artikel
-    function renderArticles(container, articles, feedId) {
+    // ---------- Rendern mit garantierter Nachrück-Logik ----------
+    function renderVisibleArticles(container, allArticles, feedId, statusSpan) {
         if (!container) return;
         const hiddenLinks = getHiddenLinks();
-        // Filtere ausgeblendete Artikel
-        const visibleArticles = articles.filter(article => {
+        // Alle nicht ausgeblendeten Artikel
+        const visiblePool = allArticles.filter(article => {
             const link = article.link || "#";
             return !hiddenLinks.includes(link);
         });
 
-        if (!visibleArticles || visibleArticles.length === 0) {
+        const shownArticles = visiblePool.slice(0, VISIBLE_LIMIT);
+        const totalPool = allArticles.length;
+        const hiddenCount = totalPool - visiblePool.length;
+
+        if (shownArticles.length === 0) {
             container.innerHTML = '<div class="empty-state">📭 Keine sichtbaren Artikel. (Alle ausgeblendet?)</div>';
+            if (statusSpan) {
+                statusSpan.innerText = `🚫 0 sichtbar (${totalPool} total, ${hiddenCount} ausgeblendet)`;
+                statusSpan.className = "feed-status status-stale";
+            }
             return;
         }
 
-        const html = visibleArticles.map(article => {
+        const html = shownArticles.map(article => {
             const title = article.title || "Ohne Titel";
             const link = article.link || "#";
             const pubDate = formatDate(article.pubDate);
@@ -427,22 +437,42 @@
         }).join('');
         container.innerHTML = html;
 
-        // Event-Listener für alle Hide-Buttons
+        if (statusSpan) {
+            statusSpan.innerText = `✅ ${shownArticles.length} sichtbar (${totalPool} total, ${hiddenCount} ausgeblendet)`;
+            statusSpan.className = "feed-status status-ok";
+        }
+
+        // Event-Listener für die neuen Hide-Buttons
         container.querySelectorAll('.hide-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const link = btn.getAttribute('data-link');
                 if (link) {
                     addHiddenLink(link);
-                    // Entferne das übergeordnete .article-item aus dem DOM
-                    const articleDiv = btn.closest('.article-item');
-                    if (articleDiv) articleDiv.remove();
-                    // Optional: Prüfen, ob die Kategorie jetzt leer ist und ggf. Platzhalter anzeigen
-                    if (container.querySelectorAll('.article-item').length === 0) {
-                        container.innerHTML = '<div class="empty-state">📭 Keine sichtbaren Artikel. (Alle ausgeblendet?)</div>';
-                    }
+                    // Neu rendern mit dem gleichen allArticles-Array → rückt nach!
+                    renderVisibleArticles(container, allArticles, feedId, statusSpan);
                 }
             });
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return "Datum unbekannt";
+        try {
+            let d = new Date(dateString);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch(e) {
+            return dateString.substring(0,10);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
         });
     }
 
@@ -454,38 +484,35 @@
         const listContainer = cardElement?.querySelector('.article-list');
         const lastUpdatedSpan = cardElement?.querySelector('.last-updated span');
 
-        // Cache anzeigen (sofort)
         const cached = loadFeedCache(feedId);
         let currentItems = cached?.items || [];
         let currentLastUpdate = cached?.lastUpdate || null;
 
+        // Sofort Cache anzeigen (falls vorhanden)
         if (currentItems.length > 0 && !forceRefresh) {
-            renderArticles(listContainer, currentItems, feedId);
+            renderVisibleArticles(listContainer, currentItems, feedId, statusSpan);
             if (lastUpdatedSpan && currentLastUpdate) lastUpdatedSpan.innerText = new Date(parseInt(currentLastUpdate)).toLocaleString();
-            if (statusSpan) {
-                statusSpan.innerText = `📦 zwischengespeichert (${currentItems.length})`;
+            if (statusSpan && !statusSpan.innerText.includes('sichtbar')) {
+                const visibleCount = currentItems.filter(a => !getHiddenLinks().includes(a.link || "#")).length;
+                statusSpan.innerText = `📦 Cache (${currentItems.length} total, ${visibleCount} sichtbar)`;
                 statusSpan.className = "feed-status status-stale";
             }
         } else if (!forceRefresh && (!currentItems || currentItems.length === 0)) {
             if (listContainer) listContainer.innerHTML = '<div class="empty-state">⏳ Lade Feed ...</div>';
         }
 
-        // Live-Abruf (immer, wenn forceRefresh oder initial)
+        // Live-Abruf
         try {
             if (statusSpan && !forceRefresh && currentItems.length===0) statusSpan.innerText = "🔄 wird geladen...";
             else if (forceRefresh && statusSpan) statusSpan.innerText = "🔄 aktualisiere...";
 
-            const newItems = await fetchWithFallback(feed);
+            let newItems = await fetchWithFallback(feed);
+            const limitedItems = newItems.slice(0, POOL_SIZE);
             const timestamp = Date.now().toString();
-            const limitedItems = newItems.slice(0, 15);
             saveFeedCache(feedId, limitedItems, timestamp);
 
-            renderArticles(listContainer, limitedItems, feedId);
+            renderVisibleArticles(listContainer, limitedItems, feedId, statusSpan);
             if (lastUpdatedSpan) lastUpdatedSpan.innerText = new Date(parseInt(timestamp)).toLocaleString();
-            if (statusSpan) {
-                statusSpan.innerText = `✅ ${limitedItems.length} Artikel (live)`;
-                statusSpan.className = "feed-status status-ok";
-            }
         } catch (error) {
             console.error(`Feed ${feedId} Fehler:`, error);
             const cachedAfterError = loadFeedCache(feedId);
@@ -497,26 +524,14 @@
                 }
             } else {
                 if (statusSpan) {
-                    statusSpan.innerText = `⚠️ Keine Verbindung – zeige Cache (${cachedAfterError.items.length})`;
+                    statusSpan.innerText = `⚠️ Keine Verbindung – zeige Cache (${cachedAfterError.items.length} total)`;
                     statusSpan.className = "feed-status status-error";
                 }
                 if (listContainer && cachedAfterError.items.length) {
-                    renderArticles(listContainer, cachedAfterError.items, feedId);
+                    renderVisibleArticles(listContainer, cachedAfterError.items, feedId, statusSpan);
                 }
             }
         }
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
-        });
     }
 
     function buildDashboardUI() {
@@ -566,19 +581,7 @@
     }
 
     document.getElementById('refreshAllBtn')?.addEventListener('click', refreshAllFeeds);
-    document.getElementById('resetHiddenBtn')?.addEventListener('click', () => {
-        resetHiddenLinks();
-        // Alle Karten neu rendern mit aktuellen Caches
-        for (const feed of FEEDS) {
-            const cached = loadFeedCache(feed.id);
-            if (cached && cached.items.length) {
-                const listContainer = document.querySelector(`#card-${feed.id} .article-list`);
-                if (listContainer) renderArticles(listContainer, cached.items, feed.id);
-            } else {
-                updateSingleFeed(feed.id, false);
-            }
-        }
-    });
+    document.getElementById('resetHiddenBtn')?.addEventListener('click', resetHiddenLinks);
 
     buildDashboardUI();
 </script>
